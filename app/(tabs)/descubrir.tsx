@@ -1,6 +1,7 @@
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ActionButton } from '@/components/general/ActionButton';
+import { ArticleCard } from '@/components/general/ArticleCard';
 import { ExpandableList } from '@/components/general/ExpandableList';
 import { PlanCard } from '@/components/general/PlanCard';
 import { SearchFiltersBar } from '@/components/general/SearchFiltersBar';
@@ -25,6 +26,22 @@ export default function DescubrirScreen() {
             <ActionButton label="Rechazar" icon="close" variant="danger" />
             <ActionButton icon="heart" variant="ghost" />
           </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Articulos destacados</Text>
+          <Text style={styles.sectionSubtitle}>
+            Vuelven a estar visibles aca para que no pierdas la referencia del carrusel.
+          </Text>
+          {bd.carousels[0].articles.slice(0, 2).map((article, index) => (
+            <ArticleCard
+              key={article.id}
+              article={article}
+              accentStyle={
+                index % 3 === 0 ? 'primary' : index % 3 === 1 ? 'success' : 'accent'
+              }
+            />
+          ))}
         </View>
 
         <View style={styles.section}>
@@ -111,6 +128,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: appColors.text,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: appColors.textSecondary,
+    lineHeight: 20,
   },
   buttonsRow: {
     flexDirection: 'row',
