@@ -12,7 +12,7 @@ type NavigationItem = {
 
 const navigationItems: NavigationItem[] = [
   { routeName: 'index', label: 'Home', icon: 'home' },
-  { routeName: 'finanzas', label: 'Finanzas', icon: 'wallet' },
+  { routeName: 'tesoros', label: 'Tesoros', icon: 'wallet' },
   { routeName: 'descubrir', label: 'Descubrir', icon: 'compass' },
   { routeName: 'agenda', label: 'Agenda', icon: 'calendar' },
   { routeName: 'salud', label: 'Salud', icon: 'heart' },
@@ -72,17 +72,26 @@ export function BottomNavigation({
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 14,
-    paddingBottom: 18,
-    paddingTop: 8,
-  },
+ wrapper: {
+  position: 'absolute',
+
+  left: 0,
+  right: 0,
+  bottom: 0,
+
+  backgroundColor: 'transparent',
+
+  paddingHorizontal: 14,
+
+  paddingBottom: 18,
+
+  paddingTop: 8,
+},
   container: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: appColors.surface,
+    backgroundColor: 'rgba(31,41,55,0.92)',
     borderRadius: 28,
     borderWidth: 1,
     borderColor: appColors.border,

@@ -1,6 +1,4 @@
-import {
-  Stack,
-} from "expo-router";
+import { Stack } from "expo-router";
 
 import {
   TreasuryProvider,
