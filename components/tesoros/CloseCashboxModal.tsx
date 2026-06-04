@@ -14,6 +14,7 @@ import {
 } from "@/services/tesorosServices/tesoros";
 
 import { Cashbox } from "@/types/tesoros/cashbox";
+import { reload } from "expo-router/build/global-state/routing";
 
 interface Props {
   visible: boolean;
@@ -56,6 +57,7 @@ export default function CloseCashboxModal({
       setNewCashboxName("");
 
       onSuccess();
+      reload();
 
       onClose();
     } catch (error) {
