@@ -30,14 +30,22 @@ export async function getTasks(): Promise<Task[]> {
 }
 
 export async function createTask(data: Omit<Task, 'id'>): Promise<void> {
-  await addDoc(tasksCollection, data);
+  // Firebase no permite campos undefined, así que los removemos
+  const cleanData = Object.fromEntries(
+    Object.entries(data).filter(([, value]) => value !== undefined)
+  );
+  await addDoc(tasksCollection, cleanData);
 }
 
 export async function updateTask(
   taskId: string,
   data: Partial<Omit<Task, 'id'>>
 ): Promise<void> {
-  await updateDoc(doc(db, 'USUARIO', USER_ID, 'tareas', taskId), data);
+  // Firebase no permite campos undefined, así que los removemos
+  const cleanData = Object.fromEntries(
+    Object.entries(data).filter(([, value]) => value !== undefined)
+  );
+  await updateDoc(doc(db, 'USUARIO', USER_ID, 'tareas', taskId), cleanData);
 }
 
 export async function deleteTask(taskId: string): Promise<void> {

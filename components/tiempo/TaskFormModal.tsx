@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Timestamp } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
@@ -11,7 +12,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Timestamp } from 'firebase/firestore';
 
 import { appColors } from '@/constants/colors';
 import { RepeatType, Task } from '@/types/tiempo/task';
