@@ -51,6 +51,19 @@ function formatDateStr(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+function padTime(value: number): string {
+  return String(value).padStart(2, '0');
+}
+
+function addOneHour(time: string): string {
+  const [rawHour, rawMinute] = time.split(':').map(Number);
+  const totalMinutes = rawHour * 60 + rawMinute + 60;
+  const cappedMinutes = Math.min(totalMinutes, 23 * 60 + 59);
+  const hour = Math.floor(cappedMinutes / 60);
+  const minute = cappedMinutes % 60;
+  return `${padTime(hour)}:${padTime(minute)}`;
+}
+
 /* ==========================================
    PROPS
 ========================================== */
@@ -87,6 +100,13 @@ export default function TaskFormModal({
   const [repeatType, setRepeatType] = useState<RepeatType>('none'); // TIE-07
   const [notificationMinutes, setNotificationMinutes] = useState(0); // TIE-08
   const [saving, setSaving] = useState(false);
+
+  function handleStartTimeChange(value: string) {
+    setStartTime(value);
+    if (!isAllDay) {
+      setEndTime(addOneHour(value));
+    }
+  }
 
   /** TIE-10: Pre-cargar datos al editar */
   useEffect(() => {
@@ -249,7 +269,7 @@ export default function TaskFormModal({
                   <TimePickerField
                     label="Hora inicio"
                     value={startTime}
-                    onChange={setStartTime}
+                    onChange={handleStartTimeChange}
                   />
                 </View>
                 <View style={styles.timeField}>

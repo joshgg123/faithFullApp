@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import {
-    Modal,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 /* ==========================================
@@ -83,6 +83,12 @@ export default function TimePickerField({
   const [hour, setHour] = useState(parsed.h);
   const [minute, setMinute] = useState(parsed.m);
 
+  React.useEffect(() => {
+    const parsedValue = parseTime(value);
+    setHour(parsedValue.h);
+    setMinute(parsedValue.m);
+  }, [value]);
+
   const MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 
   function currentMinuteIndex(): number {
@@ -104,7 +110,7 @@ export default function TimePickerField({
     onChange(`${pad(h)}:${pad(m)}`);
   }
 
-  const displayValue = value ? `${pad(hour)}:${pad(minute)}` : '';
+  const displayValue = value || '';
 
   return (
     <>
