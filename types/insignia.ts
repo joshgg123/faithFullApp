@@ -1,22 +1,11 @@
-/* ==========================================
-   FIRESTORE STRUCTURE
-   ------------------------------------------
-   LOGROS_TEMPLATE/{logroId}              (raíz — catálogo fijo, seed lo carga)
-
-   USUARIO/{uid}                          (doc del usuario)
-     streakDays: number
-     lastLoginDate: string  (YYYY-MM-DD)
-
-   USUARIO/{uid}/LOGROS/{logroId}         (subcolección — copia del template + estado)
-========================================== */
-
 export type LogroShape = "circle" | "diamond" | "square";
 
 export interface LogroTemplate {
   id: string;
   title: string;
   description: string;
-  shape: LogroShape; // para el placeholder visual
+  shape: LogroShape;
+  imageKey: string;  // ej: "logro_01" → assets/images/logros/logro_01.png
   order: number;
 }
 
@@ -26,6 +15,7 @@ export interface UserLogro {
   title: string;
   description: string;
   shape: LogroShape;
+  imageKey: string;  // mismo valor que el template, copiado para no hacer doble fetch
   order: number;
   unlocked: boolean;
   unlockedAt: string | null;

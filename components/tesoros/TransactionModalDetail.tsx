@@ -135,7 +135,7 @@ export default function TransactionDetailModal({
 
           <TouchableOpacity
             style={{
-              backgroundColor: "#111827",
+              backgroundColor: "#fff",
 
               padding: 16,
 
@@ -147,7 +147,7 @@ export default function TransactionDetailModal({
           >
             <Text
               style={{
-                color: "#FFF",
+                color: "#000000",
 
                 textAlign: "center",
 

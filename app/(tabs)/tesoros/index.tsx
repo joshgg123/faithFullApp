@@ -154,7 +154,7 @@ export default function TreasuryScreen() {
           flex: 1,
 
           backgroundColor:
-            "#1F2937",
+            "#bab9b9d4",
         }}
         contentContainerStyle={{
           padding: 16,

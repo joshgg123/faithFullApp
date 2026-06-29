@@ -1,22 +1,67 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useMemo } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 
 import { Intento, PlanCategory } from "@/types/templo/salud";
 
+/* ==========================================
+   Imágenes por categoría — al azar por intento
+========================================== */
+const CATEGORY_IMAGES: Record<PlanCategory, any[]> = {
+  espiritualidad: [
+    require("@/assets/templo/biblia.png"),
+    require("@/assets/templo/pergamino.png"),
+    require("@/assets/templo/cordero.png"),
+    require("@/assets/templo/lampara.png"),
+    require("@/assets/templo/corona.png"),
+    require("@/assets/templo/escudo.png"),
+    require("@/assets/templo/manos.png"),
+  ],
+  ejercicio: [
+    require("@/assets/templo/correr.png"),
+    require("@/assets/templo/biceps.png"),
+    require("@/assets/templo/plancha.png"),
+    require("@/assets/templo/guerrero.png"),
+    require("@/assets/templo/levant.png"),
+    require("@/assets/templo/sprint.png"),
+    require("@/assets/templo/yoga.png"),
+  ],
+  alimentacion: [
+    require("@/assets/templo/ensalada.png"),
+    require("@/assets/templo/jarra.png"),
+    require("@/assets/templo/frutos.png"),
+    require("@/assets/templo/pan.png"),
+    require("@/assets/templo/peces.png"),
+    require("@/assets/templo/sopa.png"),
+    require("@/assets/templo/datiles.png"),
+  ],
+};
+
+function getImage(category: PlanCategory, seedId: string): any {
+  const images = CATEGORY_IMAGES[category];
+  const hash = seedId.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return images[hash % images.length];
+}
+
 const CATEGORY_CONFIG: Record<
   PlanCategory,
-  { color: string; bg: string; label: string; icon: string }
+  { color: string; bg: string; label: string }
 > = {
-  ejercicio: { color: "#E8611A", bg: "#FFF1EA", label: "Ejercicio", icon: "⚡" },
-  alimentacion: { color: "#2E8B57", bg: "#EAF7EF", label: "Alimentación", icon: "🌿" },
-  espiritualidad: { color: "#6B4FBB", bg: "#F0ECFF", label: "Espiritualidad", icon: "✦" },
+  ejercicio:      { color: "#E8611A", bg: "#FFF4EE", label: "Ejercicio"      },
+  alimentacion:   { color: "#2E8B57", bg: "#EEF8F2", label: "Alimentación"   },
+  espiritualidad: { color: "#6B4FBB", bg: "#F3EEFF", label: "Espiritualidad" },
 };
 
 function FireDifficulty({ level }: { level: number }) {
   return (
     <View style={styles.fireRow}>
       {[1, 2, 3, 4, 5].map((i) => (
-        <Text key={i} style={[styles.fire, { opacity: i <= level ? 1 : 0.2 }]}>
+        <Text key={i} style={{ fontSize: 11, opacity: i <= level ? 1 : 0.15 }}>
           🔥
         </Text>
       ))}
@@ -39,18 +84,28 @@ interface PlanCardProps {
 
 export function PlanCard({ intento, onPress }: PlanCardProps) {
   const cfg = CATEGORY_CONFIG[intento.category];
+  const image = useMemo(
+    () => getImage(intento.category, intento.id),
+    [intento.category, intento.id],
+  );
 
   return (
-    <TouchableOpacity style={styles.card} onPress={() => onPress(intento)} activeOpacity={0.85}>
-      <View style={[styles.thumbnail, { backgroundColor: cfg.bg }]}>
-        <Text style={[styles.thumbnailIcon, { color: cfg.color }]}>{cfg.icon}</Text>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => onPress(intento)}
+      activeOpacity={0.8}
+    >
+      {/* Thumbnail */}
+      <View style={[styles.thumbnailWrapper, { backgroundColor: cfg.bg }]}>
+        <Image source={image} style={styles.thumbnail} resizeMode="contain" />
       </View>
 
+      {/* Contenido */}
       <View style={styles.content}>
         <View style={styles.headerRow}>
-          <View style={[styles.badge, { backgroundColor: cfg.bg }]}>
-            <Text style={[styles.badgeText, { color: cfg.color }]}>{cfg.label.toUpperCase()}</Text>
-          </View>
+          <Text style={[styles.categoryLabel, { color: cfg.color }]}>
+            {cfg.label.toUpperCase()}
+          </Text>
           <FireDifficulty level={intento.difficulty} />
         </View>
 
@@ -66,11 +121,13 @@ export function PlanCard({ intento, onPress }: PlanCardProps) {
           <View style={styles.progressRow}>
             <Text style={styles.progressLabel}>Actual</Text>
             <ProgressBar value={intento.progress} color={cfg.color} />
-            <Text style={[styles.progressValue, { color: cfg.color }]}>{intento.progress}%</Text>
+            <Text style={[styles.progressValue, { color: cfg.color }]}>
+              {intento.progress}%
+            </Text>
           </View>
           <View style={styles.progressRow}>
             <Text style={styles.progressLabel}>Mejor</Text>
-            <ProgressBar value={intento.bestScore} color="#C5C5C5" />
+            <ProgressBar value={intento.bestScore} color="#D0D0D0" />
             <Text style={styles.progressValue}>{intento.bestScore}%</Text>
           </View>
         </View>
@@ -86,20 +143,24 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginHorizontal: 16,
     marginBottom: 12,
+    overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
+    shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 3,
-    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
   },
-  thumbnail: {
+  thumbnailWrapper: {
     width: 80,
     alignItems: "center",
     justifyContent: "center",
+    paddingVertical: 12,
   },
-  thumbnailIcon: {
-    fontSize: 32,
+  thumbnail: {
+    width: 52,
+    height: 52,
   },
   content: {
     flex: 1,
@@ -111,25 +172,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 4,
+    marginBottom: 3,
   },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  badgeText: {
+  categoryLabel: {
     fontSize: 9,
     fontWeight: "700",
-    letterSpacing: 0.8,
+    letterSpacing: 1,
   },
-  fireRow: {
-    flexDirection: "row",
-    gap: 1,
-  },
-  fire: {
-    fontSize: 11,
-  },
+  fireRow: { flexDirection: "row", gap: 1 },
   title: {
     fontSize: 15,
     fontWeight: "700",
@@ -138,12 +188,10 @@ const styles = StyleSheet.create({
   },
   daysText: {
     fontSize: 11,
-    color: "#888",
+    color: "#AAA",
     marginBottom: 8,
   },
-  progressSection: {
-    gap: 4,
-  },
+  progressSection: { gap: 4 },
   progressRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -151,23 +199,23 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     fontSize: 10,
-    color: "#AAA",
+    color: "#CCC",
     width: 32,
   },
   progressBg: {
     flex: 1,
-    height: 5,
-    backgroundColor: "#F0F0F0",
-    borderRadius: 3,
+    height: 4,
+    backgroundColor: "#F2F2F2",
+    borderRadius: 2,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    borderRadius: 3,
+    borderRadius: 2,
   },
   progressValue: {
     fontSize: 10,
-    color: "#AAA",
+    color: "#CCC",
     width: 28,
     textAlign: "right",
   },

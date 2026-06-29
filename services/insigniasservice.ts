@@ -80,14 +80,16 @@ export async function updateStreak(): Promise<UserStreak> {
       ? current.streakDays + 1 // racha continúa
       : 1; // se rompió o es la primera vez
 
-  const updated = {
+  const updated: UserStreak = {
     streakDays: newStreakDays,
     lastLoginDate: today,
   };
 
-  await updateDoc(userDocRef, updated);
+  // setDoc con merge:true crea los campos si no existen,
+  // o los actualiza si ya están — nunca falla por doc vacío.
+  await setDoc(userDocRef, updated, { merge: true });
 
-  return updated as UserStreak;
+  return updated;
 }
 
 /* ==========================================

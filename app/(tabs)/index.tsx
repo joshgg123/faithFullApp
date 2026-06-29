@@ -15,6 +15,8 @@ import { LogrosModal } from "@/components/insignia/Logrosmodal";
 import { UserLogro, UserStreak } from "@/types/insignia";
 import { updateStreak, getUserLogros } from "@/services/insigniasservice";
 
+
+
 export default function HomeScreen() {
   const [streak, setStreak] = useState<UserStreak>({ streakDays: 0, lastLoginDate: "" });
   const [logros, setLogros] = useState<UserLogro[]>([]);
@@ -43,6 +45,8 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      
+      
       <View style={styles.container}>
         <Text style={styles.greeting}>HOLA, [NOMBRE]</Text>
 
@@ -80,6 +84,7 @@ export default function HomeScreen() {
         streakDays={streak.streakDays}
         onClose={() => setRachaVisible(false)}
       />
+      
 
       <LogrosModal
         visible={logrosVisible}

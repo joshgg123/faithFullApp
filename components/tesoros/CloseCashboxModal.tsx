@@ -182,7 +182,7 @@ export default function CloseCashboxModal({
                 flex: 1,
 
                 backgroundColor:
-                  "#111827",
+                  "#ffff",
 
                 padding: 16,
 
@@ -192,11 +192,11 @@ export default function CloseCashboxModal({
               }}
             >
               {loading ? (
-                <ActivityIndicator color="#FFF" />
+                <ActivityIndicator color="#000000" />
               ) : (
                 <Text
                   style={{
-                    color: "#FFF",
+                    color: "#000000",
 
                     fontWeight: "600",
                   }}
