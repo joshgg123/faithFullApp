@@ -1,3 +1,4 @@
+// components/general/LatestArticles.tsx
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -23,9 +24,7 @@ export function LatestArticles() {
   async function loadArticles() {
     try {
       setLoading(true);
-
       const data = await getLatestArticles(5);
-
       setArticles(data);
     } catch (error) {
       console.log(error);
@@ -34,90 +33,114 @@ export function LatestArticles() {
     }
   }
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Últimos artículos</Text>
-
-      {loading ? (
+  if (loading) {
+    return (
+      <View style={styles.centerLoader}>
         <ActivityIndicator color="#F5C518" />
-      ) : (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.scrollContainer}
+    >
+      {articles.map((article) => (
+        <TouchableOpacity
+          key={article.id}
+          style={styles.card}
+          activeOpacity={0.85}
+          onPress={() => {
+            // Navegación al detalle
+            console.log(article.id);
+          }}
         >
-          {articles.map((article) => (
-            <TouchableOpacity
-              key={article.id}
-              style={styles.card}
-              activeOpacity={0.8}
-              onPress={() => {
-                // TODO: navegar al detalle
-                console.log(article.id);
-              }}
-            >
-              <Image
-                source={{ uri: article.image }}
-                style={styles.image}
-              />
+          <Image
+            source={{ uri: article.image }}
+            style={styles.image}
+            resizeMode="cover"
+          />
 
-              <View style={styles.content}>
-                <Text
-                  style={styles.articleTitle}
-                  numberOfLines={2}
-                >
-                  {article.title}
-                </Text>
+          <View style={styles.content}>
+            <Text style={styles.category}>{article.category}</Text>
+            <Text style={styles.articleTitle} numberOfLines={2}>
+              {article.title}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      ))}
 
-                <Text style={styles.category}>
-                  {article.category}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      )}
-    </View>
+      {/* TARJETA FINAL DE CONTINUIDAD (La flecha del sketch ">") */}
+      <TouchableOpacity 
+        style={styles.arrowCard} 
+        activeOpacity={0.7}
+        onPress={() => console.log("Ver más artículos")}
+      >
+        <Text style={styles.arrowText}>❯</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 25,
+  centerLoader: {
+    paddingVertical: 30,
+    alignItems: "center",
+    justifyContent: "center",
   },
-
-  title: {
-    color: "#FFF",
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 15,
+  scrollContainer: {
+    paddingRight: 16,
+    alignItems: "center",
   },
-
   card: {
-    width: 190,
+    width: 140, // Más compacto y cuadrado para que entren más en pantalla
+    height: 160,
     backgroundColor: "#111",
-    borderRadius: 18,
+    borderRadius: 20,
     overflow: "hidden",
-    marginRight: 15,
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: "#1E1E1E",
   },
-
   image: {
     width: "100%",
-    height: 120,
+    height: 85,
   },
-
   content: {
-    padding: 12,
+    padding: 10,
+    flex: 1,
+    justifyContent: "space-between",
   },
-
+  category: {
+    color: "#E8611A",
+    fontSize: 8,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
   articleTitle: {
     color: "#FFF",
-    fontSize: 16,
+    fontSize: 11,
     fontWeight: "700",
+    lineHeight: 14,
+    marginTop: 2,
   },
-
-  category: {
-    color: "#888",
-    marginTop: 6,
-    textTransform: "capitalize",
+  arrowCard: {
+    width: 50,
+    height: 160,
+    backgroundColor: "#111",
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: "#222",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 4,
+  },
+  arrowText: {
+    color: "#444",
+    fontSize: 20,
+    fontWeight: "bold",
   },
 });

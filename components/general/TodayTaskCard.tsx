@@ -1,3 +1,5 @@
+// components/general/TodayTaskCard.tsx
+import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
 import { useTodayTasks } from "@/hooks/useTasksToday";
@@ -8,34 +10,49 @@ export function TodayTasksCard() {
 
   if (loading) {
     return (
-      <View style={styles.card}>
-        <Text style={styles.title}>Hoy</Text>
+      <View style={styles.cardCompact}>
+        <View style={styles.header}>
+          <Text style={styles.title}>HOY</Text>
+        </View>
         <Text style={styles.subtitle}>Cargando...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.card}>
-      <Text style={styles.title}>Hoy</Text>
+    <View style={styles.cardCompact}>
+      <View style={styles.header}>
+        <Text style={styles.title}>HOY</Text>
+      </View>
 
-      {tasks.length === 0 && (
-        <Text style={styles.empty}>
-          No tienes tareas para hoy
-        </Text>
-      )}
+      <View style={styles.listContainer}>
+        {tasks.length === 0 && (
+          <Text style={styles.empty}>No hay tareas para hoy</Text>
+        )}
 
-      {tasks.slice(0, 3).map((task) => (
-        <View key={task.id} style={styles.row}>
-          <Text style={styles.check}>
-            {isTaskCompletedToday(task) ? "✅" : "⭕"}
-          </Text>
+        {tasks.slice(0, 3).map((task) => (
+          <View key={task.id} style={styles.row}>
+            <View
+              style={[
+                styles.checkCircle,
+                isTaskCompletedToday(task) && styles.checkCircleCompleted,
+              ]}
+            >
+              {isTaskCompletedToday(task) && <Text style={styles.checkmark}>✓</Text>}
+            </View>
 
-          <Text style={styles.task}>
-            {task.title}
-          </Text>
-        </View>
-      ))}
+            <Text 
+              style={[
+                styles.taskText,
+                isTaskCompletedToday(task) && styles.taskTextCompleted,
+              ]} 
+              numberOfLines={1}
+            >
+              {task.title}
+            </Text>
+          </View>
+        ))}
+      </View>
 
       <Text style={styles.footer}>
         {completed}/{total} completadas
@@ -45,47 +62,82 @@ export function TodayTasksCard() {
 }
 
 const styles = StyleSheet.create({
-  card: {
+  cardCompact: {
     backgroundColor: "#111",
-    borderRadius: 20,
-    padding: 20,
-    marginTop: 20,
+    borderRadius: 24,
+    borderWidth: 1.5,
+    borderColor: "#222",
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    height: 190, // Altura exacta para emparejar con la columna de Pedro
+    justifyContent: "space-between",
   },
-
-  title: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 15,
-  },
-
-  subtitle: {
-    color: "#888",
-  },
-
-  empty: {
-    color: "#888",
-  },
-
-  row: {
-    flexDirection: "row",
-    marginBottom: 12,
+  header: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#222",
+    paddingBottom: 6,
     alignItems: "center",
   },
-
-  check: {
-    fontSize: 18,
-    marginRight: 10,
+  title: {
+    color: "#FFF",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1,
   },
-
-  task: {
-    color: "white",
+  listContainer: {
+    flex: 1,
+    justifyContent: "center",
+    gap: 8,
+    marginVertical: 4,
+  },
+  subtitle: {
+    color: "#666",
+    fontSize: 11,
+    textAlign: "center",
+  },
+  empty: {
+    color: "#555",
+    fontSize: 11,
+    textAlign: "center",
+    fontStyle: "italic",
+  },
+  row: {
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+  },
+  checkCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
+    borderColor: "#444",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkCircleCompleted: {
+    borderColor: "#E8611A",
+    backgroundColor: "#E8611A22",
+  },
+  checkmark: {
+    color: "#E8611A",
+    fontSize: 11,
+    fontWeight: "900",
+  },
+  taskText: {
+    color: "#FFF",
+    fontSize: 12,
+    fontWeight: "600",
     flex: 1,
   },
-
+  taskTextCompleted: {
+    color: "#555",
+    textDecorationLine: "line-through",
+  },
   footer: {
-    color: "#888",
-    marginTop: 10,
-    fontSize: 13,
+    color: "#555",
+    fontSize: 10,
+    textAlign: "center",
+    fontWeight: "600",
   },
 });

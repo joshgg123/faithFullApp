@@ -1,3 +1,4 @@
+// components/insignia/Logrosmodal.tsx
 import React, { useState } from "react";
 import {
   View, Text, StyleSheet, Modal, TouchableOpacity,
@@ -10,16 +11,16 @@ import { LogroItem, LogroImage } from "@/components/insignia/Logroitem";
 const { height, width } = Dimensions.get("window");
 
 /* ==========================================
-   Vista detallada de un logro
+    Vista detallada de un logro (Minimal)
 ========================================== */
 function LogroDetail({ logro, onBack }: { logro: UserLogro; onBack: () => void }) {
   const color = logro.unlocked ? "#F5C518" : "#444";
 
   return (
     <View style={detail.container}>
-      {/* Imagen grande (real o placeholder) */}
+      {/* Imagen grande */}
       <View style={[detail.imageWrapper, { borderColor: color }]}>
-        <LogroImage logro={logro} size={110} />
+        <LogroImage logro={logro} size={100} />
       </View>
 
       {/* Título — oculto si no desbloqueado */}
@@ -34,7 +35,7 @@ function LogroDetail({ logro, onBack }: { logro: UserLogro; onBack: () => void }
           : "Seguí usando la app para descubrir este logro."}
       </Text>
 
-      {/* Fecha de desbloqueo */}
+      {/* Fecha */}
       {logro.unlocked && logro.unlockedAt && (
         <Text style={detail.date}>
           Desbloqueado el{" "}
@@ -44,7 +45,7 @@ function LogroDetail({ logro, onBack }: { logro: UserLogro; onBack: () => void }
         </Text>
       )}
 
-      {/* Badge de estado */}
+      {/* Badge */}
       <View style={[detail.badge, { backgroundColor: logro.unlocked ? "#F5C51822" : "#1A1A1A", borderColor: color }]}>
         <Text style={[detail.badgeText, { color }]}>
           {logro.unlocked ? "✓ Desbloqueado" : "🔒 Bloqueado"}
@@ -66,8 +67,8 @@ const detail = StyleSheet.create({
     paddingHorizontal: 28,
   },
   imageWrapper: {
-    width: 130,
-    height: 130,
+    width: 120,
+    height: 120,
     borderRadius: 20,
     borderWidth: 2,
     alignItems: "center",
@@ -76,7 +77,7 @@ const detail = StyleSheet.create({
     backgroundColor: "#1A1A1A",
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "800",
     color: "#FFF",
     marginBottom: 10,
@@ -116,7 +117,7 @@ const detail = StyleSheet.create({
 });
 
 /* ==========================================
-   Grid item con nombre debajo
+    Grid item con nombre debajo (Compacto)
 ========================================== */
 function GridItem({ logro, onPress }: { logro: UserLogro; onPress: (l: UserLogro) => void }) {
   return (
@@ -126,7 +127,7 @@ function GridItem({ logro, onPress }: { logro: UserLogro; onPress: (l: UserLogro
       activeOpacity={0.75}
     >
       <View style={{ opacity: logro.unlocked ? 1 : 0.4 }}>
-        <LogroImage logro={logro} size={58} />
+        <LogroImage logro={logro} size={50} />
       </View>
       <Text style={[grid.name, { color: logro.unlocked ? "#FFF" : "#555" }]} numberOfLines={1}>
         {logro.unlocked ? logro.title : "???"}
@@ -137,20 +138,20 @@ function GridItem({ logro, onPress }: { logro: UserLogro; onPress: (l: UserLogro
 
 const grid = StyleSheet.create({
   wrapper: {
-    width: (width * 0.85 - 48) / 3,
+    width: (width * 0.85 - 40) / 3, // Grid de 3 columnas
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 16,
     gap: 6,
   },
   name: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: "600",
     textAlign: "center",
   },
 });
 
 /* ==========================================
-   LogrosModal
+    LogrosModal (Rediseñado)
 ========================================== */
 interface LogrosModalProps {
   visible: boolean;
@@ -177,9 +178,7 @@ export function LogrosModal({ visible, logros, onClose }: LogrosModalProps) {
           {/* Header */}
           <View style={styles.header}>
             <View>
-              <Text style={styles.headerTitle}>
-                {selected ? selected.unlocked ? selected.title : "Logro bloqueado" : "Logros"}
-              </Text>
+              <Text style={styles.headerTitle}>Logros</Text>
               {!selected && (
                 <Text style={styles.headerSub}>
                   {unlockedCount} de {logros.length} desbloqueados
@@ -218,8 +217,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#111",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    height: height * 0.72,
-    paddingBottom: 32,
+    height: height * 0.70, // Un poco más bajo
+    paddingBottom: 24,
   },
   header: {
     flexDirection: "row",
@@ -227,18 +226,22 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 14,
+    paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#1E1E1E",
   },
-  headerTitle: { fontSize: 18, fontWeight: "800", color: "#FFF" },
-  headerSub: { fontSize: 12, color: "#555", marginTop: 2 },
+  headerTitle: { fontSize: 16, fontWeight: "800", color: "#FFF" },
+  headerSub: { fontSize: 11, color: "#555", marginTop: 2 },
   closeBtn: {
-    width: 32, height: 32, borderRadius: 16,
-    backgroundColor: "#222", alignItems: "center", justifyContent: "center",
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#222",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  closeText: { fontSize: 13, color: "#AAA", fontWeight: "600" },
-  gridContainer: { paddingVertical: 20, paddingHorizontal: 16 },
+  closeText: { fontSize: 12, color: "#AAA", fontWeight: "600" },
+  gridContainer: { paddingVertical: 16, paddingHorizontal: 16 },
   gridRow: {
     flexDirection: "row",
     flexWrap: "wrap",
