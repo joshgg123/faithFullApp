@@ -143,7 +143,7 @@ console.log("MARKDOWN:", article?.markdownBody);
       }}
     >
       <TouchableOpacity
-        onPress={() => router.back()}
+        onPress={() => router.replace("/(tabs)/descubrir")}
         style={styles.backButton}
       >
         <Text style={styles.backText}>
