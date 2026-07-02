@@ -1,6 +1,6 @@
-import { Text, View } from "react-native";
-
+import { AppText as Text } from "@/components/ui/AppText";
 import { Cashbox } from "@/types/tesoros/cashbox";
+import { View } from "react-native";
 
 interface Props {
   cashbox: Cashbox;

@@ -1,11 +1,10 @@
+import { AppText as Text } from "@/components/ui/AppText";
+import { Transaction } from "@/types/tesoros/transaction";
 import {
   Modal,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
-
-import { Transaction } from "@/types/tesoros/transaction";
 
 interface Props {
   visible: boolean;

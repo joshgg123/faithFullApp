@@ -1,9 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-
+import { AppText as Text } from '@/components/ui/AppText';
 import { appColors } from '@/constants/colors';
 import { Task } from '@/types/tiempo/task';
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
 import TaskItem from './TaskItem';
 
 /* ==========================================

@@ -1,20 +1,19 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import { AppText as Text } from "@/components/ui/AppText";
+import { DailyTask, PlanCategory, PlanDay } from "@/types/templo/salud";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
   Animated,
   Dimensions,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { DailyTask, PlanCategory, PlanDay } from "@/types/templo/salud";
-
 import {
-  completeTask,
   advanceToNextDay,
+  completeTask,
 } from "@/services/temploServices/SaludServices";
 
 /*

@@ -3,9 +3,10 @@ import {
   ActivityIndicator,
   Dimensions,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
+
+import { AppText as Text } from "@/components/ui/AppText";
 
 import { LineChart } from "react-native-chart-kit";
 

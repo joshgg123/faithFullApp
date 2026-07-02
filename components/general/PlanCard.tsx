@@ -1,11 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
-import { StyleSheet, Text, View } from 'react-native';
-
-import { appColors } from '@/constants/colors';
 import { Chip } from '@/components/general/Chip';
 import { MiniProgressBar } from '@/components/general/MiniProgressBar';
+import { AppText as Text } from '@/components/ui/AppText';
+import { appColors } from '@/constants/colors';
 import type { ActivityPlan, PlanCategory } from '@/types/general/plan';
+import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import { StyleSheet, View } from 'react-native';
 
 type PlanCardProps = {
   plan: ActivityPlan;

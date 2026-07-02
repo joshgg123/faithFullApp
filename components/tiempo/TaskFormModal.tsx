@@ -1,3 +1,6 @@
+import { AppText as Text } from '@/components/ui/AppText';
+import { appColors } from '@/constants/colors';
+import { RepeatType, Task } from '@/types/tiempo/task';
 import { Ionicons } from '@expo/vector-icons';
 import { Timestamp } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
@@ -7,14 +10,10 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-
-import { appColors } from '@/constants/colors';
-import { RepeatType, Task } from '@/types/tiempo/task';
 import TimePickerField from './TimePickerField';
 
 /* ==========================================

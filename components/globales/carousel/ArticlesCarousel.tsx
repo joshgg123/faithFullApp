@@ -1,9 +1,9 @@
-import { Image } from 'expo-image';
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-
-import { appColors } from '@/constants/colors';
 import { ArticleCard } from '@/components/general/ArticleCard';
+import { AppText as Text } from '@/components/ui/AppText';
+import { appColors } from '@/constants/colors';
 import type { ArticlesShowcase } from '@/types/carousel/article';
+import { Image } from 'expo-image';
+import { SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
 
 type ArticlesCarouselProps = {
   showcase: ArticlesShowcase;

@@ -1,14 +1,13 @@
+import { AppText as Text } from "@/components/ui/AppText";
 import React from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
   Dimensions,
+  Modal,
   Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
-
 /*
  * Lottie solo en nativo (iOS/Android).
  * En web usamos emoji de fuego para evitar el error

@@ -1,9 +1,8 @@
+import { AppText as Text } from "@/components/ui/AppText";
 import {
   Dimensions,
-  Text,
   View,
 } from "react-native";
-
 import {
   LineChart,
 } from "react-native-gifted-charts";

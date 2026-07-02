@@ -1,25 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
   ActivityIndicator,
+  SafeAreaView,
   ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
-import { RachaModal } from "@/components/insignia/RachaModal";
-import { LogrosModal } from "@/components/insignia/Logrosmodal";
-import { TodayTasksCard } from "@/components/general/TodayTaskCard";
 import { FinanceSummaryCard } from "@/components/general/FinanceSummaryCard";
+import { LatestArticles } from "@/components/general/LatestArticles";
+import { TodayTasksCard } from "@/components/general/TodayTaskCard";
+import { LogrosModal } from "@/components/insignia/Logrosmodal";
+import { RachaModal } from "@/components/insignia/RachaModal";
+import { AppText as Text } from "@/components/ui/AppText";
+import { getUserName } from "@/services/userServices";
 import { UserLogro, UserStreak } from "@/types/insignia";
-import {getUserName } from "@/services/userServices";
-import {LatestArticles} from "@/components/general/LatestArticles";
 
 import {
-  updateStreak,
   getUserLogros,
+  updateStreak,
 } from "@/services/insigniasservice";
 
 export default function HomeScreen() {

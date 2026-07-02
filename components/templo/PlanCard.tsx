@@ -1,13 +1,12 @@
+import { AppText as Text } from "@/components/ui/AppText";
+import { Intento, PlanCategory } from "@/types/templo/salud";
 import React, { useMemo } from "react";
 import {
-  View,
-  Text,
+  Image,
   StyleSheet,
   TouchableOpacity,
-  Image,
+  View,
 } from "react-native";
-
-import { Intento, PlanCategory } from "@/types/templo/salud";
 
 /* ==========================================
    Imágenes por categoría — al azar por intento

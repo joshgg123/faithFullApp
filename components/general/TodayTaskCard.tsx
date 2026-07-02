@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet } from "react-native";
-
+import { AppText as Text } from "@/components/ui/AppText";
 import { useTodayTasks } from "@/hooks/useTasksToday";
 import { isTaskCompletedToday } from "@/utils/taskUtils";
+import { StyleSheet, View } from "react-native";
 
 export function TodayTasksCard() {
   const { tasks, loading, completed, total } = useTodayTasks();

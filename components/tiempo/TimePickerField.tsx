@@ -1,12 +1,11 @@
+import { AppText as Text } from '@/components/ui/AppText';
 import React, { useState } from 'react';
 import {
   Modal,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-
 /* ==========================================
    WHEEL (mismo patrón que DatePickerField)
 ========================================== */

@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+
+import { AppText as Text } from "@/components/ui/AppText";
 
 import { router } from "expo-router";
 

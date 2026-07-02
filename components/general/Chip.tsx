@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View } from 'react-native';
-
+import { AppText as Text } from '@/components/ui/AppText';
 import { appColors } from '@/constants/colors';
+import { StyleSheet, View } from 'react-native';
 
 type ChipProps = {
   label: string;

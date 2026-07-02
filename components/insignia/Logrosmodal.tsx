@@ -1,11 +1,15 @@
+import { LogroImage } from "@/components/insignia/Logroitem";
+import { AppText as Text } from "@/components/ui/AppText";
+import { UserLogro } from "@/types/insignia";
 import React, { useState } from "react";
 import {
-  View, Text, StyleSheet, Modal, TouchableOpacity,
-  ScrollView, Dimensions,
+  Dimensions,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
-
-import { UserLogro } from "@/types/insignia";
-import { LogroItem, LogroImage } from "@/components/insignia/Logroitem";
 
 const { height, width } = Dimensions.get("window");
 

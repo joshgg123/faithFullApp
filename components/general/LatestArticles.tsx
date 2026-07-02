@@ -4,11 +4,11 @@ import {
   Image,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
 
+import { AppText as Text } from "@/components/ui/AppText";
 import { getLatestArticles } from "@/services/extras/MParticulos";
 import { Article } from "@/types/content/article";
 

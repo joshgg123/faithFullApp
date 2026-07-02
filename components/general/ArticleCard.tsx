@@ -1,8 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-
-import { appColors } from '@/constants/colors';
 import { Chip } from '@/components/general/Chip';
+import { AppText as Text } from '@/components/ui/AppText';
+import { appColors } from '@/constants/colors';
 import type { Article } from '@/types/carousel/article';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 type ArticleCardProps = {
   article: Article;

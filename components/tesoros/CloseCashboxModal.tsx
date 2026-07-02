@@ -1,17 +1,16 @@
 import { useState } from "react";
 
+import { AppText as Text } from "@/components/ui/AppText";
+import {
+  closeAndCreateCashbox,
+} from "@/services/tesorosServices/tesoros";
 import {
   ActivityIndicator,
   Modal,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-
-import {
-  closeAndCreateCashbox,
-} from "@/services/tesorosServices/tesoros";
 
 import { Cashbox } from "@/types/tesoros/cashbox";
 import { reload } from "expo-router/build/global-state/routing";

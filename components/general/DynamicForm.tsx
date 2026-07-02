@@ -2,11 +2,11 @@ import { useState } from "react";
 import {
   StyleSheet,
   View,
-  Text,
   TextInput,
   Switch,
   TouchableOpacity,
 } from "react-native";
+import { AppText as Text } from "@/components/ui/AppText";
 import DatePickerField from "./DatePickerField";
 import { Field } from "../../types/general/field";
 
@@ -70,7 +70,7 @@ export default function DynamicForm({
                 <Text style={styles.label}>{field.label}</Text>
 
                 <View style={styles.optionsWrapper}>
-                  {field.options.map(
+                  {field.options?.map(
                     (option: { label: string; value: string | number }) => {
                       const selected = values[field.name] === option.value;
 

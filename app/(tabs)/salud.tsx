@@ -1,28 +1,26 @@
-import React, { useState, useCallback, useMemo } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  StatusBar,
-  Image,
-} from "react-native";
-import { useFocusEffect, useRouter } from "expo-router";
-
 import { PlanCard } from "@/components/templo/PlanCard";
 import { PlanDetailModal } from "@/components/templo/PlanDetailmodal";
-
+import { AppText as Text } from "@/components/ui/AppText";
 import { Intento, PlanCategory, PlanTemplate } from "@/types/templo/salud";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useMemo, useState } from "react";
+import {
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import {
   getActiveIntentos,
+  getIntentoByTemplateId,
   getIntentosByCategory,
   getPlanTemplates,
-  getIntentoByTemplateId,
-  startIntento,
   restartIntento,
+  startIntento,
 } from "@/services/temploServices/SaludServices";
 
 /* ==========================================

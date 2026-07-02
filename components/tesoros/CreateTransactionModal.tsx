@@ -3,10 +3,11 @@ import { useMemo } from "react";
 import {
   Modal,
   ScrollView,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+
+import { AppText as Text } from "@/components/ui/AppText";
 
 import DynamicForm from "@/components/general/DynamicForm";
 

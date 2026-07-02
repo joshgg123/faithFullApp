@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-
 import { TaskScreen } from "@/components/templo/TaskScreen";
-import { Intento, PlanDay } from "@/types/templo/salud";
+import { AppText as Text } from "@/components/ui/AppText";
 import { getIntento, getPlanDay } from "@/services/temploServices/SaludServices";
+import { Intento, PlanDay } from "@/types/templo/salud";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 export default function IntentoScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

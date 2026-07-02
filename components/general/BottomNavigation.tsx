@@ -1,8 +1,8 @@
+import { AppText as Text } from '@/components/ui/AppText';
+import { appColors } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-
-import { appColors } from '@/constants/colors';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 type NavigationItem = {
   routeName: string;

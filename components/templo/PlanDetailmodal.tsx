@@ -1,16 +1,15 @@
+import { AppText as Text } from "@/components/ui/AppText";
+import { Intento, PlanCategory, PlanTemplate } from "@/types/templo/salud";
 import React, { useMemo } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  ScrollView,
   Dimensions,
   Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
-
-import { PlanCategory, PlanTemplate, Intento } from "@/types/templo/salud";
 
 const { height } = Dimensions.get("window");
 

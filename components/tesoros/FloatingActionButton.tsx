@@ -1,5 +1,5 @@
+import { AppText as Text } from "@/components/ui/AppText";
 import {
-  Text,
   TouchableOpacity,
 } from "react-native";
 

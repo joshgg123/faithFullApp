@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -14,6 +13,7 @@ import {
 } from "expo-router";
 
 import TransactionList from "@/components/tesoros/TransactionList";
+import { AppText as Text } from "@/components/ui/AppText";
 
 import TransactionDetailModal from "@/components/tesoros/TransactionModalDetail";
 

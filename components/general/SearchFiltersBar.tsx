@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-
 import { ActionButton } from '@/components/general/ActionButton';
+import { AppText as Text } from '@/components/ui/AppText';
 import { appColors } from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 type SearchFilterOption = {
   id: string;

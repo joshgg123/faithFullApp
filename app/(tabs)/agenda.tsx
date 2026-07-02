@@ -6,7 +6,6 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -14,6 +13,7 @@ import {
 import TaskFormModal from '@/components/tiempo/TaskFormModal';
 import TaskList from '@/components/tiempo/TaskList';
 import WeeklyCalendar from '@/components/tiempo/WeeklyCalendar';
+import { AppText as Text } from '@/components/ui/AppText';
 import { appColors } from '@/constants/colors';
 import useAgenda, { AgendaProvider } from '@/contexts/TiempoContext';
 import { Task } from '@/types/tiempo/task';

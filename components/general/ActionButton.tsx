@@ -1,7 +1,7 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-
+import { AppText as Text } from '@/components/ui/AppText';
 import { appColors } from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 type ActionButtonVariant = 'primary' | 'success' | 'danger' | 'ghost';
 type ActionButtonSize = 'sm' | 'md';

@@ -1,8 +1,8 @@
+import { AppText as Text } from '@/components/ui/AppText';
+import { appColors } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-
-import { appColors } from '@/constants/colors';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 type ExpandableListItem = {
   id: string;

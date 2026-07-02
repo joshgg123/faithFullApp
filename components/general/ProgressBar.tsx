@@ -1,8 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Text, View } from 'react-native';
-
+import { AppText as Text } from '@/components/ui/AppText';
 import { appColors } from '@/constants/colors';
 import type { ProgressMetric, ProgressVariant } from '@/types/general/progress';
+import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, View } from 'react-native';
 
 type ProgressBarProps = {
   progress: ProgressMetric;
