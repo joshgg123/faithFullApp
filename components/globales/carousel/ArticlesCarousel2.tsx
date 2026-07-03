@@ -7,9 +7,9 @@ import {
   FlatList,
   Pressable,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
+import { AppText as Text } from "../../ui/AppText";
 
 type Props = {
   title: string;

@@ -11,6 +11,8 @@ import {
 import { AppText as Text } from "@/components/ui/AppText";
 import { getLatestArticles } from "@/services/extras/MParticulos";
 import { Article } from "@/types/content/article";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 export function LatestArticles() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -36,7 +38,14 @@ export function LatestArticles() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Últimos artículos</Text>
+      <TouchableOpacity
+         style={styles.titleRow}
+         activeOpacity={0.7}
+         onPress={() => router.push("/descubrir")}
+       >
+         <Text style={styles.title}>Últimos artículos</Text>
+         <Ionicons name="chevron-forward" size={18} color="#888" />
+       </TouchableOpacity>
 
       {loading ? (
         <ActivityIndicator color="#F5C518" />
@@ -51,8 +60,10 @@ export function LatestArticles() {
               style={styles.card}
               activeOpacity={0.8}
               onPress={() => {
-                // TODO: navegar al detalle
-                console.log(article.id);
+                router.push({
+                 pathname: "/talentos/[articleId]",
+                 params: { articleId: article.id, from: "home" },
+               } as any);
               }}
             >
               <Image
@@ -85,11 +96,17 @@ const styles = StyleSheet.create({
     marginTop: 25,
   },
 
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 15,
+  },
+
   title: {
     color: "#FFF",
     fontSize: 22,
     fontWeight: "700",
-    marginBottom: 15,
   },
 
   card: {

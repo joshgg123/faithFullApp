@@ -4,14 +4,16 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 import { FinanceSummaryCard } from "@/components/general/FinanceSummaryCard";
+import { HomeCharacter } from "@/components/general/HomeCharacter";
 import { LatestArticles } from "@/components/general/LatestArticles";
 import { TodayTasksCard } from "@/components/general/TodayTaskCard";
+import { LogrosButton } from "@/components/insignia/LogrosButton";
 import { LogrosModal } from "@/components/insignia/Logrosmodal";
+import { RachaButton } from "@/components/insignia/RachaButton";
 import { RachaModal } from "@/components/insignia/RachaModal";
 import { AppText as Text } from "@/components/ui/AppText";
 import { getUserName } from "@/services/userServices";
@@ -88,49 +90,28 @@ export default function HomeScreen() {
             />
           ) : (
             <View style={styles.btnRow}>
-              {/* Racha */}
-              <TouchableOpacity
-                style={styles.rachaBtn}
-                activeOpacity={0.8}
+              <RachaButton
+                streakDays={streak.streakDays}
                 onPress={() => setRachaVisible(true)}
-              >
-                <Text style={styles.fireEmoji}>🔥</Text>
-
-                <Text style={styles.rachaNumber}>
-                  {streak.streakDays}
-                </Text>
-
-                <Text style={styles.rachaLabel}>
-                  días de racha
-                </Text>
-              </TouchableOpacity>
-
-              {/* Logros */}
-              <TouchableOpacity
-                style={styles.logrosBtn}
-                activeOpacity={0.8}
+              />
+              <LogrosButton
+                unlockedCount={unlockedCount}
+                totalCount={logros.length}
                 onPress={() => setLogrosVisible(true)}
-              >
-                <Text style={styles.trophyEmoji}>🏆</Text>
-
-                <Text style={styles.logrosNumber}>
-                  {unlockedCount}/{logros.length}
-                </Text>
-
-                <Text style={styles.logrosLabel}>
-                  logros
-                </Text>
-              </TouchableOpacity>
+              />
             </View>
           )}
 
           {/* Tareas */}
-          <TodayTasksCard />
-
-          <LatestArticles />
-          
+          <View style={styles.todayRow}>
+            <HomeCharacter />
+            <View style={styles.todayCardWrap}>
+              <TodayTasksCard />
+            </View>
+          </View>
+          {/* Finanzas */}
           <FinanceSummaryCard />
-
+          <LatestArticles />
         </View>
       </ScrollView>
 
@@ -170,6 +151,8 @@ const styles = StyleSheet.create({
     color: "#FFF",
     marginBottom: 24,
     letterSpacing: 0.5,
+    textAlign: "center",
+    width: "100%",
   },
 
   btnRow: {
@@ -177,56 +160,11 @@ const styles = StyleSheet.create({
     gap: 16,
     marginBottom: 24,
   },
-
-  rachaBtn: {
+  todayRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  todayCardWrap: {
     flex: 1,
-    backgroundColor: "#111",
-    borderRadius: 24,
-    borderWidth: 1.5,
-    borderColor: "#E8611A55",
-    paddingVertical: 24,
-    alignItems: "center",
-  },
-
-  fireEmoji: {
-    fontSize: 40,
-  },
-
-  rachaNumber: {
-    fontSize: 38,
-    fontWeight: "900",
-    color: "#FFF",
-  },
-
-  rachaLabel: {
-    color: "#888",
-    marginTop: 4,
-    fontSize: 12,
-  },
-
-  logrosBtn: {
-    flex: 1,
-    backgroundColor: "#111",
-    borderRadius: 24,
-    borderWidth: 1.5,
-    borderColor: "#F5C51855",
-    paddingVertical: 24,
-    alignItems: "center",
-  },
-
-  trophyEmoji: {
-    fontSize: 40,
-  },
-
-  logrosNumber: {
-    fontSize: 38,
-    fontWeight: "900",
-    color: "#FFF",
-  },
-
-  logrosLabel: {
-    color: "#888",
-    marginTop: 4,
-    fontSize: 12,
   },
 });

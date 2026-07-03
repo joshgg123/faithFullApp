@@ -50,25 +50,24 @@
 // }import { useEffect, useState } from "react";
 
 import {
-    ActivityIndicator,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
+import { AppText as Text } from "@/components/ui/AppText";
+import {
+  router,
+  useLocalSearchParams,
+} from "expo-router";
 import Markdown from "react-native-markdown-display";
 
 import {
-    router,
-    useLocalSearchParams,
-} from "expo-router";
-
-import {
-    getArticleById,
-    guardarArticuloLeido,
+  getArticleById,
+  guardarArticuloLeido,
 } from "@/services/talentosServices/talentos";
 
 import { Article } from "@/types/talentos/article";
@@ -81,6 +80,11 @@ export default function ArticleDetailScreen() {
   const { articleId } =
     useLocalSearchParams<{
       articleId: string;
+    }>();
+
+  const { from } =
+    useLocalSearchParams<{
+      from?: string;
     }>();
 
   const [loading, setLoading] =
@@ -143,7 +147,14 @@ console.log("MARKDOWN:", article?.markdownBody);
       }}
     >
       <TouchableOpacity
-        onPress={() => router.back()}
+        /*onPress={() => router.replace("/(tabs)/descubrir")}*/
+        onPress={() => {
+          if (from === "home") {
+           router.replace("/(tabs)");
+          } else {
+           router.replace("/(tabs)/descubrir");
+          }
+        }}
         style={styles.backButton}
       >
         <Text style={styles.backText}>
