@@ -1,8 +1,8 @@
-import { AppText as Text } from '@/components/ui/AppText';
-import { appColors } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+
+import { appColors } from '@/constants/colors';
 
 type NavigationItem = {
   routeName: string;
@@ -11,11 +11,11 @@ type NavigationItem = {
 };
 
 const navigationItems: NavigationItem[] = [
-  { routeName: 'index', label: 'Home', icon: 'home' },
-  { routeName: 'tesoros', label: 'Tesoros', icon: 'wallet' },
-  { routeName: 'descubrir', label: 'Descubrir', icon: 'compass' },
-  { routeName: 'agenda', label: 'Agenda', icon: 'calendar' },
-  { routeName: 'salud', label: 'Salud', icon: 'heart' },
+  { routeName: 'index', label: 'Home', icon: 'home-outline' },
+  { routeName: 'tesoros', label: 'Tesoros', icon: 'wallet-outline' },
+  { routeName: 'descubrir', label: 'Descubrir', icon: 'compass-outline' },
+  { routeName: 'agenda', label: 'Agenda', icon: 'calendar-outline' },
+  { routeName: 'salud', label: 'Salud', icon: 'heart-outline' },
 ];
 
 export function BottomNavigation({
@@ -27,11 +27,11 @@ export function BottomNavigation({
     <View style={styles.wrapper}>
       <View style={styles.container}>
         {navigationItems.map((item) => {
-          const routeIndex = state.routes.findIndex((route) => route.name === item.routeName);
+          const routeIndex = state.routes.findIndex(
+            (route) => route.name === item.routeName
+          );
 
-          if (routeIndex === -1) {
-            return null;
-          }
+          if (routeIndex === -1) return null;
 
           const route = state.routes[routeIndex];
           const isFocused = state.index === routeIndex;
@@ -56,13 +56,26 @@ export function BottomNavigation({
               accessibilityState={isFocused ? { selected: true } : {}}
               accessibilityLabel={options?.tabBarAccessibilityLabel}
               onPress={onPress}
-              style={[styles.item, isFocused && styles.itemActive]}>
+              style={[styles.item, isFocused && styles.itemActive]}
+            >
               <Ionicons
-                name={item.icon}
-                size={22}
-                color={isFocused ? appColors.primaryBright : appColors.textSecondary}
+                name={isFocused ? item.icon.replace('-outline', '') as any : item.icon}
+                size={isFocused ? 25 : 23}
+                color={
+                  isFocused
+                    ? appColors.primary
+                    : appColors.textSecondary
+                }
               />
-              <Text style={[styles.label, isFocused && styles.labelActive]}>{item.label}</Text>
+
+              <Text
+                style={[
+                  styles.label,
+                  isFocused && styles.labelActive,
+                ]}
+              >
+                {item.label}
+              </Text>
             </Pressable>
           );
         })}
@@ -72,55 +85,43 @@ export function BottomNavigation({
 }
 
 const styles = StyleSheet.create({
- wrapper: {
-  position: 'absolute',
+  wrapper: {
+    backgroundColor: appColors.background,
+    borderTopWidth: 1,
+    borderTopColor: appColors.border,
+  },
 
-  left: 0,
-  right: 0,
-  bottom: 0,
-
-  backgroundColor: 'transparent',
-
-  paddingHorizontal: 14,
-
-  paddingBottom: 18,
-
-  paddingTop: 8,
-},
   container: {
     flexDirection: 'row',
+    height: 72,
+    justifyContent: 'space-around',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(31,41,55,0.92)',
-    borderRadius: 28,
-    borderWidth: 1,
-    borderColor: appColors.border,
-    paddingHorizontal: 8,
-    paddingVertical: 10,
-    shadowColor: '#0f172a',
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: -2 },
-    elevation: 10,
+    backgroundColor: appColors.surface,
+    paddingBottom: 8,
   },
+
   item: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
-    minHeight: 56,
-    borderRadius: 20,
-    paddingVertical: 6,
+    height: '100%',
+    gap: 3,
+    borderTopWidth: 3,
+    borderTopColor: 'transparent',
   },
+
   itemActive: {
-    backgroundColor: appColors.primarySoft,
+    borderTopColor: appColors.primary,
   },
+
   label: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '500',
     color: appColors.textSecondary,
   },
+
   labelActive: {
     color: appColors.primary,
+    fontWeight: '600',
   },
 });
