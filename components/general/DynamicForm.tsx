@@ -1,16 +1,21 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   StyleSheet,
-  View,
-  TextInput,
   Switch,
+  TextInput,
   TouchableOpacity,
+  View,
 } from "react-native";
-import { AppText as Text } from "@/components/ui/AppText";
-import DatePickerField from "./DatePickerField";
-import { Field } from "../../types/general/field";
 
-interface DynamicFormProps {
+import { AppText as Text } from "@/components/ui/AppText";
+
+import DatePickerField from "./DatePickerField";
+import Dropdown from "./Dropdown";
+import SegmentedControl from "./SegmentedControl";
+
+import { Field } from "@/types/general/field";
+
+interface Props {
   fields: Field[];
   onSubmit: (values: Record<string, any>) => void;
 }
@@ -18,85 +23,227 @@ interface DynamicFormProps {
 export default function DynamicForm({
   fields,
   onSubmit,
-}: DynamicFormProps) {
+}: Props) {
   const [values, setValues] = useState<Record<string, any>>({});
 
-  const updateValue = (name: string, value: any) => {
+  const [errors, setErrors] =
+    useState<Record<string, string>>({});
+
+  function updateValue(
+    name: string,
+    value: any
+  ) {
     setValues((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
 
-  return (
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
+  }
+
+  function validate() {
+    const newErrors: Record<
+      string,
+      string
+    > = {};
+
+    fields.forEach((field) => {
+      if (
+        field.visibleWhen &&
+        values[field.visibleWhen.field] !==
+          field.visibleWhen.equals
+      ) {
+        return;
+      }
+
+      const value = values[field.name];
+
+      if (
+        field.required &&
+        (!value || value === "")
+      ) {
+        newErrors[field.name] =
+          "Este campo es obligatorio.";
+      }
+
+      if (
+        field.numbersOnly &&
+        value &&
+        !/^\d+$/.test(value)
+      ) {
+        newErrors[field.name] =
+          "Solo se permiten números enteros.";
+      }
+    });
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  }
+
+  function submit() {
+    if (!validate()) return;
+
+    onSubmit(values);
+  }
+
+  const visibleFields = useMemo(() => {
+    return fields.filter((field) => {
+      if (!field.visibleWhen) return true;
+
+      return (
+        values[field.visibleWhen.field] ===
+        field.visibleWhen.equals
+      );
+    });
+  }, [fields, values]);
+    return (
     <View style={styles.formContainer}>
-      {fields.map((field) => {
+      {visibleFields.map((field) => {
         switch (field.type) {
           case "text":
             return (
-              <View key={field.name} style={styles.fieldContainer}>
-                <Text style={styles.label}>{field.label}</Text>
+              <View
+                key={field.name}
+                style={styles.fieldContainer}
+              >
+                <Text style={styles.label}>
+                  {field.label}
+                </Text>
 
                 <TextInput
-                  style={styles.textInput}
+                  style={[
+                    styles.textInput,
+                    errors[field.name] &&
+                      styles.inputError,
+                  ]}
                   placeholder={field.placeholder}
-                  placeholderTextColor="#a1a1aa"
-                  value={values[field.name] || ""}
-                  onChangeText={(text) => updateValue(field.name, text)}
+                  placeholderTextColor="#9CA3AF"
+                  value={values[field.name] ?? ""}
+                  keyboardType={
+                    field.keyboardType ??
+                    "default"
+                  }
+                  autoCapitalize="sentences"
+                  onChangeText={(text) => {
+                    let value = text;
+
+                    if (field.numbersOnly) {
+                      value = value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
+                    }
+
+                    updateValue(
+                      field.name,
+                      value
+                    );
+                  }}
                 />
+
+                {!!errors[field.name] && (
+                  <Text style={styles.error}>
+                    {errors[field.name]}
+                  </Text>
+                )}
               </View>
             );
 
-          case "boolean":
+          case "segmented":
             return (
-              <View key={field.name} style={styles.switchContainer}>
-                <View style={styles.switchTextContainer}>
-                  <Text style={styles.label}>{field.label}</Text>
-                </View>
+              <View
+                key={field.name}
+                style={styles.fieldContainer}
+              >
+                <Text style={styles.label}>
+                  {field.label}
+                </Text>
 
-                <Switch
-                  trackColor={{ false: "#e4e4e7", true: "#ddd6fe" }}
-                  thumbColor={values[field.name] ? "#7c3aed" : "#f4f4f5"}
-                  ios_backgroundColor="#e4e4e7"
-                  value={values[field.name] || false}
-                  onValueChange={(value) => updateValue(field.name, value)}
+                <SegmentedControl
+                  options={field.options ?? []}
+                  value={values[field.name]}
+                  onChange={(value) =>
+                    updateValue(
+                      field.name,
+                      value
+                    )
+                  }
                 />
+
+                {!!errors[field.name] && (
+                  <Text style={styles.error}>
+                    {errors[field.name]}
+                  </Text>
+                )}
               </View>
             );
 
           case "select":
             return (
-              <View key={field.name} style={styles.fieldContainer}>
-                <Text style={styles.label}>{field.label}</Text>
+              <View
+                key={field.name}
+                style={styles.fieldContainer}
+              >
+                <Dropdown
+                  label={field.label}
+                  placeholder={
+                    field.placeholder ??
+                    "Seleccionar"
+                  }
+                  value={values[field.name]}
+                  options={
+                    field.options ?? []
+                  }
+                  onChange={(value) =>
+                    updateValue(
+                      field.name,
+                      value
+                    )
+                  }
+                />
 
-                <View style={styles.optionsWrapper}>
-                  {field.options?.map(
-                    (option: { label: string; value: string | number }) => {
-                      const selected = values[field.name] === option.value;
-
-                      return (
-                        <TouchableOpacity
-                          key={option.value}
-                          style={[
-                            styles.optionButton,
-                            selected && styles.optionButtonSelected,
-                          ]}
-                          onPress={() => updateValue(field.name, option.value)}
-                        >
-                          <Text
-                            style={[
-                              styles.optionText,
-                              selected && styles.optionTextSelected,
-                            ]}
-                          >
-                            {option.label}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    }
-                  )}
-                </View>
+                {!!errors[field.name] && (
+                  <Text style={styles.error}>
+                    {errors[field.name]}
+                  </Text>
+                )}
               </View>
+            );
+
+          case "boolean":
+            return (
+<TouchableOpacity
+  key={field.name}
+  activeOpacity={0.8}
+  style={styles.switchContainer}
+  onPress={() =>
+    updateValue(
+      field.name,
+      !(values[field.name] ?? false)
+    )
+  }
+>
+  <View style={styles.switchTextContainer}>
+    <Text style={styles.label}>
+      {field.label}
+    </Text>
+  </View>
+
+  <View
+    style={[
+      styles.circle,
+      values[field.name] && styles.circleActive,
+    ]}
+  >
+    {values[field.name] && (
+      <View style={styles.innerDot} />
+    )}
+  </View>
+</TouchableOpacity>
             );
 
           case "date":
@@ -105,7 +252,12 @@ export default function DynamicForm({
                 key={field.name}
                 label={field.label}
                 value={values[field.name]}
-                onChange={(date) => updateValue(field.name, date)}
+                onChange={(date) =>
+                  updateValue(
+                    field.name,
+                    date
+                  )
+                }
               />
             );
 
@@ -114,104 +266,144 @@ export default function DynamicForm({
         }
       })}
 
-      {/* SUBMIT BUTTON */}
       <TouchableOpacity
         style={styles.submitButton}
-        onPress={() => onSubmit(values)}
+        activeOpacity={0.9}
+        onPress={submit}
       >
-        <Text style={styles.submitButtonText}>Enviar</Text>
+        <Text
+          style={styles.submitButtonText}
+        >
+          Guardar movimiento
+        </Text>
       </TouchableOpacity>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
-  // Contenedor general del formulario
   formContainer: {
-    gap: 20, // Espaciado consistente entre campos
-    paddingVertical: 10,
+    gap: 22,
+    paddingVertical: 8,
   },
 
-  // Contenedores por campo
   fieldContainer: {
-    gap: 6,
-  },
-
-  // Etiquetas unificadas con el DatePicker
-  label: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#27272a",
-  },
-
-  // Inputs de texto estilizados
-  textInput: {
-    borderWidth: 1,
-    borderColor: "#d4d4d8",
-    borderRadius: 16,
-    padding: 16,
-    backgroundColor: "#ffffff",
-    fontSize: 16,
-    color: "#27272a",
-  },
-
-  // Fila del Switch (Boolean)
-  switchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: "#e4e4e7",
-    borderRadius: 16,
-    padding: 16,
-  },
-  switchTextContainer: {
-    flex: 1,
-    paddingRight: 8,
-  },
-
-  // Contenedor de opciones (Select)
-  optionsWrapper: {
     gap: 8,
   },
-  optionButton: {
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#d4d4d8",
-    backgroundColor: "#ffffff",
-  },
-  optionButtonSelected: {
-    backgroundColor: "#f5f3ff", // Fondo sutil violeta al seleccionar
-    borderColor: "#7c3aed", // Borde violeta fuerte
-  },
-  optionText: {
+
+  label: {
     fontSize: 15,
-    color: "#27272a",
-    fontWeight: "500",
-  },
-  optionTextSelected: {
-    color: "#7c3aed", // Texto violeta cuando está activo
     fontWeight: "600",
+    color: "#18181B",
+    marginBottom: 2,
+  },
+  circle: {
+  width: 26,
+  height: 26,
+  borderRadius: 13,
+
+  borderWidth: 2,
+  borderColor: "#D4D4D8",
+
+  alignItems: "center",
+  justifyContent: "center",
+
+  backgroundColor: "#FFFFFF",
+},
+
+circleActive: {
+  borderColor: "#7C3AED",
+},
+
+innerDot: {
+  width: 12,
+  height: 12,
+  borderRadius: 6,
+  backgroundColor: "#7C3AED",
+},
+
+  textInput: {
+    height: 56,
+    backgroundColor: "#FFFFFF",
+
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+
+    borderRadius: 16,
+
+    paddingHorizontal: 16,
+
+    fontSize: 16,
+    color: "#18181B",
   },
 
-  // Botón Principal de Envío
-  submitButton: {
-    backgroundColor: "#7c3aed", // El mismo violeta del DatePicker
-    borderRadius: 16,
-    padding: 16,
-    marginTop: 12,
-    shadowColor: "#7c3aed",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 3, // Sombra suave para Android
+  inputError: {
+    borderColor: "#EF4444",
   },
+
+  error: {
+    marginTop: 4,
+    marginLeft: 4,
+
+    color: "#EF4444",
+
+    fontSize: 13,
+
+    fontWeight: "500",
+  },
+
+switchContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+
+  minHeight: 60,
+
+  borderWidth: 1,
+  borderColor: "#E5E7EB",
+  borderRadius: 16,
+  backgroundColor: "#FFFFFF",
+
+  paddingHorizontal: 16,
+},
+
+switchTextContainer: {
+  flex: 1,
+  justifyContent: "center",
+  marginRight: 12,
+},
+
+  submitButton: {
+    marginTop: 12,
+
+    height: 58,
+
+    borderRadius: 18,
+
+    backgroundColor: "#7C3AED",
+
+    justifyContent: "center",
+
+    alignItems: "center",
+
+    shadowColor: "#7C3AED",
+
+    shadowOpacity: 0.18,
+
+    shadowRadius: 12,
+
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+
+    elevation: 5,
+  },
+
   submitButtonText: {
-    color: "#ffffff",
-    textAlign: "center",
-    fontWeight: "600",
-    fontSize: 16,
+    color: "#FFFFFF",
+
+    fontWeight: "700",
+
+    fontSize: 17,
   },
 });

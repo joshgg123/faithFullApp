@@ -18,15 +18,30 @@ import { RachaModal } from "@/components/insignia/RachaModal";
 import { AppText as Text } from "@/components/ui/AppText";
 import { getUserName } from "@/services/userServices";
 import { UserLogro, UserStreak } from "@/types/insignia";
+import { db } from "@/services/firebaseService";
+import { collection, onSnapshot, query } from "firebase/firestore";
 
 import {
-  getUserLogros,
   updateStreak,
 } from "@/services/insigniasservice";
 
+const HARDCODED_USER_ID = "DsKU3kJoDuWZywM8RdRo";
+
 export default function HomeScreen() {
   const [userName, setUserName] = useState("");
-  
+  const [streak, setStreak] = useState<UserStreak>({
+    streakDays: 0,
+    lastLoginDate: "",
+  });
+
+  // Estado reactivo para los logros locales de esta pantalla
+  const [localLogros, setLocalLogros] = useState<UserLogro[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [rachaVisible, setRachaVisible] = useState(false);
+  const [logrosVisible, setLogrosVisible] = useState(false);
+
+  // 1. Obtener nombre del usuario
   useEffect(() => {
     async function fetchUserName() {
       const name = await getUserName();
@@ -35,40 +50,45 @@ export default function HomeScreen() {
     
     fetchUserName();
   }, []);
-  const [streak, setStreak] = useState<UserStreak>({
-    streakDays: 0,
-    lastLoginDate: "",
-  });
 
-  const [logros, setLogros] = useState<UserLogro[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const [rachaVisible, setRachaVisible] = useState(false);
-  const [logrosVisible, setLogrosVisible] = useState(false);
-
+  // 2. 🔥 OBSERVADOR EN TIEMPO REAL: Sincroniza los logros y actualiza el contador al instante
   useEffect(() => {
-    loadData();
+    const logrosRef = collection(db, "USUARIO", HARDCODED_USER_ID, "LOGROS");
+    const q = query(logrosRef);
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const listaLogros = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as UserLogro[];
+
+      setLocalLogros(listaLogros);
+    }, (error) => {
+      console.error("Error escuchando logros en el Home: ", error);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  async function loadData() {
-    setLoading(true);
-
-    try {
-      const [streakData, logrosData] = await Promise.all([
-        updateStreak(),
-        getUserLogros(),
-      ]);
-
-      setStreak(streakData);
-      setLogros(logrosData);
-    } finally {
-      setLoading(false);
+  // 3. Cargar la racha (y quitar la carga estática de logros anteriores)
+  useEffect(() => {
+    async function loadStreakData() {
+      setLoading(true);
+      try {
+        const streakData = await updateStreak();
+        setStreak(streakData);
+      } catch (error) {
+        console.error("Error al cargar racha:", error);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
 
-  const unlockedCount = logros.filter(
-    (l) => l.unlocked
-  ).length;
+    loadStreakData();
+  }, []);
+
+  // ⚡ El conteo se recalcula solo cada vez que 'localLogros' cambie en Firestore
+  const unlockedCount = localLogros.filter((l) => l.unlocked).length;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -94,9 +114,10 @@ export default function HomeScreen() {
                 streakDays={streak.streakDays}
                 onPress={() => setRachaVisible(true)}
               />
+              {/* El botón ahora reflejará el cambio al milisegundo */}
               <LogrosButton
                 unlockedCount={unlockedCount}
-                totalCount={logros.length}
+                totalCount={localLogros.length}
                 onPress={() => setLogrosVisible(true)}
               />
             </View>
@@ -109,12 +130,14 @@ export default function HomeScreen() {
               <TodayTasksCard />
             </View>
           </View>
-          {/* Finanzas */}
+          
+          {/* Finanzas y Artículos */}
           <FinanceSummaryCard />
           <LatestArticles />
         </View>
       </ScrollView>
 
+      {/* Modales del sistema */}
       <RachaModal
         visible={rachaVisible}
         streakDays={streak.streakDays}
@@ -123,7 +146,6 @@ export default function HomeScreen() {
 
       <LogrosModal
         visible={logrosVisible}
-        logros={logros}
         onClose={() => setLogrosVisible(false)}
       />
     </SafeAreaView>
@@ -135,16 +157,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#0A0A0A",
   },
-
   scrollContent: {
     paddingBottom: 40,
   },
-
   container: {
     flex: 1,
     padding: 20,
   },
-
   greeting: {
     fontSize: 28,
     fontWeight: "900",
@@ -154,7 +173,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     width: "100%",
   },
-
   btnRow: {
     flexDirection: "row",
     gap: 16,

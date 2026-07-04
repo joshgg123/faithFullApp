@@ -49,21 +49,28 @@ export default function CreateTransactionModal({
         },
 
         {
-          name: "amount",
+  name: "amount",
+  label: "Monto",
+  type: "text",
+  placeholder: "10000",
 
-          label: "Monto",
+  keyboardType: "number-pad",
 
-          type: "text",
+  numbersOnly: true,
 
-          placeholder: "10000",
-        },
+  required: true,
+},
 
         {
-          name: "category",
+  name: "category",
 
-          label: "Categoría",
+  label: "Categoría",
 
-          type: "select",
+  type: "select",
+
+  placeholder: "Seleccionar categoría",
+
+  required: true,
 
           options: [
             {
@@ -93,26 +100,25 @@ export default function CreateTransactionModal({
         },
 
         {
-          name: "type",
+  name:"type",
 
-          label: "Tipo",
+  label:"Tipo",
 
-          type: "select",
+  type:"segmented",
 
-          options: [
-            {
-              label: "Ingreso",
+  required:true,
 
-              value: "income",
-            },
-
-            {
-              label: "Gasto",
-
-              value: "expense",
-            },
-          ],
-        },
+  options:[
+      {
+        label:"Ingreso",
+        value:"income"
+      },
+      {
+        label:"Gasto",
+        value:"expense"
+      }
+  ]
+},
 
         {
           name: "isScheduled",
@@ -124,13 +130,17 @@ export default function CreateTransactionModal({
         },
 
         {
-          name: "scheduledFor",
+    name:"scheduledFor",
 
-          label:
-            "Fecha programada",
+    label:"Fecha programada",
 
-          type: "date",
-        },
+    type:"date",
+
+    visibleWhen:{
+        field:"isScheduled",
+        equals:true
+    }
+},
       ],
       [],
     );

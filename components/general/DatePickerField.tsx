@@ -1,10 +1,13 @@
 import { AppText as Text } from "@/components/ui/AppText";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Modal,
-  StyleSheet,
+  ScrollView,
   TouchableOpacity,
   View,
+  StyleSheet,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from "react-native";
 
 interface Props {
@@ -14,50 +17,87 @@ interface Props {
   placeholder?: string;
 }
 
-const months = [
-  "ENE",
-  "FEB",
-  "MAR",
-  "ABR",
-  "MAY",
-  "JUN",
-  "JUL",
-  "AGO",
-  "SEP",
-  "OCT",
-  "NOV",
-  "DIC",
-];
+const months = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
+const ITEM_HEIGHT = 44;
+
+// 1. LISTA DE AÑOS FIJA: Evita que el array mute dinámicamente rompiendo el scroll
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = Array.from({ length: 41 }, (_, i) => CURRENT_YEAR - 20 + i); // 20 años atrás y 20 adelante
 
 function Wheel({
+  data,
   value,
-  previousValue,
-  nextValue,
-  onIncrement,
-  onDecrement,
+  onChange,
 }: {
+  data: (string | number)[];
   value: string | number;
-  previousValue: string | number;
-  nextValue: string | number;
-  onIncrement: () => void;
-  onDecrement: () => void;
+  onChange: (val: any) => void;
 }) {
+  const scrollRef = useRef<ScrollView>(null);
+  const isInitialRender = useRef(true);
+
+  // Encontrar el índice del valor seleccionado actual
+  const selectedIndex = useMemo(() => {
+    const idx = data.indexOf(value);
+    return idx !== -1 ? idx : 0;
+  }, [data, value]);
+
+  // Sincronizar la posición del scroll visual cuando cambia el valor externamente o se abre
+  useEffect(() => {
+    const scrollToTarget = () => {
+      scrollRef.current?.scrollTo({
+        y: selectedIndex * ITEM_HEIGHT,
+        animated: !isInitialRender.current,
+      });
+      isInitialRender.current = false;
+    };
+
+    // Un pequeño delay asegura que el ScrollView esté montado y listo en el layout
+    const timer = setTimeout(scrollToTarget, 60);
+    return () => clearTimeout(timer);
+  }, [selectedIndex]);
+
+  // Manejar el final del scroll de forma precisa
+  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    const index = Math.round(offsetY / ITEM_HEIGHT);
+    const safeIndex = Math.max(0, Math.min(index, data.length - 1));
+    const selected = data[safeIndex];
+
+    if (selected !== value) {
+      onChange(selected);
+    }
+  };
+
   return (
     <View style={styles.wheelContainer}>
-      {/* PREVIOUS */}
-      <TouchableOpacity onPress={onDecrement} style={styles.wheelButton}>
-        <Text style={styles.wheelTextSecondary}>{previousValue}</Text>
-      </TouchableOpacity>
-
-      {/* CURRENT */}
-      <View style={styles.wheelCurrentBox}>
-        <Text style={styles.wheelTextPrimary}>{value}</Text>
-      </View>
-
-      {/* NEXT */}
-      <TouchableOpacity onPress={onIncrement} style={styles.wheelButton}>
-        <Text style={styles.wheelTextSecondary}>{nextValue}</Text>
-      </TouchableOpacity>
+      {/* Contenedores fantasmas superiores e inferiores para dar un espaciado perfecto */}
+      <ScrollView
+        ref={scrollRef}
+        showsVerticalScrollIndicator={false}
+        snapToInterval={ITEM_HEIGHT}
+        decelerationRate="fast"
+        onMomentumScrollEnd={handleScrollEnd} // Detecta de forma óptima el freno del scroll
+        scrollEventThrottle={16}
+        contentContainerStyle={{
+          paddingVertical: ITEM_HEIGHT * 2, // Espacio para que el primer y último item queden centrados
+        }}
+      >
+        {data.map((item) => {
+          const selected = item === value;
+          return (
+            <View
+              key={String(item)}
+              style={[styles.wheelItem, selected && styles.wheelItemActive]}
+            >
+              <Text style={[styles.wheelText, selected && styles.wheelTextActive]}>
+                {item}
+              </Text>
+            </View>
+          );
+        })}
+      </ScrollView>
+      <View style={styles.centerOverlayPointer} pointerEvents="none" />
     </View>
   );
 }
@@ -68,29 +108,48 @@ export default function DatePickerField({
   label,
   placeholder = "Seleccionar fecha",
 }: Props) {
-  const today = useMemo(() => value || new Date(), [value]);
-
   const [open, setOpen] = useState(false);
-  const [day, setDay] = useState(today.getDate());
-  const [month, setMonth] = useState(today.getMonth());
-  const [year, setYear] = useState(today.getFullYear());
 
-  const maxDays = new Date(year, month + 1, 0).getDate();
+  // Estados locales intermedios para el modal (así no mutamos el valor real hasta dar 'Confirmar')
+  const [tempDay, setTempDay] = useState(1);
+  const [tempMonth, setTempMonth] = useState(0);
+  const [tempYear, setTempYear] = useState(CURRENT_YEAR);
+
+  // Sincronizar estados locales cuando el modal se abre
+  useEffect(() => {
+    if (open) {
+      const activeDate = value || new Date();
+      setTempDay(activeDate.getDate());
+      setTempMonth(activeDate.getMonth());
+      setTempYear(activeDate.getFullYear());
+    }
+  }, [open, value]);
+
+  // Calcular dinámicamente los días del mes intermedio seleccionado
+  const maxDays = useMemo(() => {
+    return new Date(tempYear, tempMonth + 1, 0).getDate();
+  }, [tempMonth, tempYear]);
+
+  // Si cambiamos de mes y el día guardado supera al día máximo, ajustamos automáticamente
+  useEffect(() => {
+    if (tempDay > maxDays) {
+      setTempDay(maxDays);
+    }
+  }, [maxDays, tempDay]);
+
+  const daysArray = useMemo(() => {
+    return Array.from({ length: maxDays }, (_, i) => String(i + 1).padStart(2, "0"));
+  }, [maxDays]);
 
   const formattedDate = value
-    ? `${String(value.getDate()).padStart(2, "0")}/${String(
-        value.getMonth() + 1
-      ).padStart(2, "0")}/${value.getFullYear()}`
+    ? `${String(value.getDate()).padStart(2, "0")}/${String(value.getMonth() + 1).padStart(2, "0")}/${value.getFullYear()}`
     : "";
 
-  const updateDate = (newDay: number, newMonth: number, newYear: number) => {
-    const safeDay = Math.min(
-      newDay,
-      new Date(newYear, newMonth + 1, 0).getDate()
-    );
-
-    const date = new Date(newYear, newMonth, safeDay);
-    onChange(date);
+  const handleConfirm = () => {
+    // Asegurar que el día sea válido antes de enviar al onChange principal
+    const safeDay = Math.min(tempDay, maxDays);
+    onChange(new Date(tempYear, tempMonth, safeDay));
+    setOpen(false);
   };
 
   return (
@@ -99,10 +158,7 @@ export default function DatePickerField({
       <View style={styles.inputContainer}>
         {label && <Text style={styles.label}>{label}</Text>}
 
-        <TouchableOpacity
-          style={styles.inputField}
-          onPress={() => setOpen(true)}
-        >
+        <TouchableOpacity style={styles.inputField} onPress={() => setOpen(true)}>
           <Text style={styles.inputText}>{formattedDate || placeholder}</Text>
         </TouchableOpacity>
       </View>
@@ -111,74 +167,32 @@ export default function DatePickerField({
       <Modal visible={open} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            {/* HEADER */}
             <Text style={styles.modalHeader}>Seleccionar fecha</Text>
 
-            {/* WHEELS */}
             <View style={styles.wheelsRow}>
-              {/* DAY */}
+              {/* DÍAS */}
               <Wheel
-                value={String(day).padStart(2, "0")}
-                previousValue={String(day <= 1 ? maxDays : day - 1).padStart(
-                  2,
-                  "0"
-                )}
-                nextValue={String(day >= maxDays ? 1 : day + 1).padStart(
-                  2,
-                  "0"
-                )}
-                onIncrement={() => {
-                  const next = day >= maxDays ? 1 : day + 1;
-                  setDay(next);
-                  updateDate(next, month, year);
-                }}
-                onDecrement={() => {
-                  const prev = day <= 1 ? maxDays : day - 1;
-                  setDay(prev);
-                  updateDate(prev, month, year);
-                }}
+                data={daysArray}
+                value={String(tempDay).padStart(2, "0")}
+                onChange={(val) => setTempDay(Number(val))}
               />
 
-              {/* MONTH */}
+              {/* MESES */}
               <Wheel
-                value={months[month]}
-                previousValue={months[month <= 0 ? 11 : month - 1]}
-                nextValue={months[month >= 11 ? 0 : month + 1]}
-                onIncrement={() => {
-                  const next = month >= 11 ? 0 : month + 1;
-                  setMonth(next);
-                  updateDate(day, next, year);
-                }}
-                onDecrement={() => {
-                  const prev = month <= 0 ? 11 : month - 1;
-                  setMonth(prev);
-                  updateDate(day, prev, year);
-                }}
+                data={months}
+                value={months[tempMonth]}
+                onChange={(val) => setTempMonth(months.indexOf(val))}
               />
 
-              {/* YEAR */}
+              {/* AÑOS */}
               <Wheel
-                value={year}
-                previousValue={year - 1}
-                nextValue={year + 1}
-                onIncrement={() => {
-                  const next = year + 1;
-                  setYear(next);
-                  updateDate(day, month, next);
-                }}
-                onDecrement={() => {
-                  const prev = year - 1;
-                  setYear(prev);
-                  updateDate(day, month, prev);
-                }}
+                data={YEARS}
+                value={tempYear}
+                onChange={(val) => setTempYear(Number(val))}
               />
             </View>
 
-            {/* BUTTON */}
-            <TouchableOpacity
-              style={styles.confirmButton}
-              onPress={() => setOpen(false)}
-            >
+            <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
               <Text style={styles.confirmButtonText}>Confirmar</Text>
             </TouchableOpacity>
           </View>
@@ -189,93 +203,92 @@ export default function DatePickerField({
 }
 
 const styles = StyleSheet.create({
-  // Estilos del Input Principal
   inputContainer: {
     gap: 4,
   },
   label: {
     fontSize: 16,
     fontWeight: "500",
+    color: "#27272A",
   },
   inputField: {
     borderWidth: 1,
-    borderColor: "#d4d4d8",
+    borderColor: "#D4D4D8",
     borderRadius: 16,
     padding: 16,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#FFF",
   },
   inputText: {
-    color: "#27272a",
+    color: "#27272A",
   },
-
-  // Estilos del Modal
   modalOverlay: {
     flex: 1,
-    alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
     paddingHorizontal: 24,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Fondo translúcido corregido
   },
   modalContent: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#FFF",
     borderRadius: 24,
     padding: 24,
-    width: "100%",
-    maxWidth: 384,
   },
   modalHeader: {
-    textAlign: "center",
     fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 32,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 20,
+    color: "#18181B",
   },
   wheelsRow: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
+    alignItems: "center",
+    height: ITEM_HEIGHT * 5, // Altura exacta para mostrar 5 filas (2 arriba, 1 activa, 2 abajo)
+    overflow: "hidden",
   },
-
-  // Estilos de las Ruedas (Wheel)
   wheelContainer: {
     flex: 1,
-    alignItems: "center",
-    marginHorizontal: 4,
+    height: "100%",
+    position: "relative",
   },
-  wheelButton: {
-    paddingVertical: 8,
-  },
-  wheelTextSecondary: {
-    fontSize: 20,
-    color: "#a1a1aa",
-  },
-  wheelCurrentBox: {
-    backgroundColor: "#f4f4f5",
-    borderRadius: 24,
-    height: 96,
-    width: "100%", // Ocupa todo el ancho de su flex-1 de manera fluida
+  wheelItem: {
+    height: ITEM_HEIGHT,
     alignItems: "center",
     justifyContent: "center",
-    marginVertical: 8,
-    borderWidth: 1,
-    borderColor: "#e4e4e7",
   },
-  wheelTextPrimary: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "#000000",
+  wheelItemActive: {
+    // Mantén limpio el fondo de los ítems para no solaparse con el pointer central
   },
-
-  // Botón Confirmar
+  wheelText: {
+    fontSize: 16,
+    color: "#A1A1AA",
+  },
+  wheelTextActive: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#7C3AED",
+  },
+  centerOverlayPointer: {
+    position: "absolute",
+    top: "50%",
+    marginTop: -ITEM_HEIGHT / 2,
+    height: ITEM_HEIGHT,
+    width: "100%",
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "#E5E7EB",
+    backgroundColor: "rgba(124,58,237,0.04)",
+    borderRadius: 8,
+  },
   confirmButton: {
-    backgroundColor: "#7c3aed",
-    borderRadius: 16,
+    marginTop: 24,
+    backgroundColor: "#7C3AED",
     padding: 16,
-    marginTop: 40,
+    borderRadius: 16,
   },
   confirmButtonText: {
-    color: "#ffffff",
+    color: "#FFF",
     textAlign: "center",
     fontWeight: "600",
-    fontSize: 16,
   },
 });
