@@ -5,7 +5,7 @@ import { Alert } from "react-native";
 
 const HARDCODED_USER_ID = "DsKU3kJoDuWZywM8RdRo";
 
-export type AchievementType = "streak" | "articles_read" | "transactions" | "tasks";
+export type AchievementType = "streak" | "articles_read" | "transactions" | "tasks" | "tasks_completed";
 
 export function useAchievementCheck() {
   // Estado local para capturar el logro recién desbloqueado y pasárselo a un modal custom si querés

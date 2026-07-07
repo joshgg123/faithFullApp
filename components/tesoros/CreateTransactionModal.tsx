@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-
 import {
   Modal,
   ScrollView,
@@ -8,20 +7,16 @@ import {
 } from "react-native";
 
 import { AppText as Text } from "@/components/ui/AppText";
-
 import DynamicForm from "@/components/general/DynamicForm";
-
 import useTreasury from "@/contexts/TesoroContext";
-
 import { Cashbox } from "@/types/tesoros/cashbox";
-
 import { Field } from "@/types/general/field";
+
+import { useAchievementCheck } from "@/hooks/useAchievementCheck"; // 🏆 Importamos tu hook dinámico
 
 interface Props {
   visible: boolean;
-
   onClose: () => void;
-
   cashbox: Cashbox;
 }
 
@@ -30,173 +25,104 @@ export default function CreateTransactionModal({
   onClose,
   cashbox,
 }: Props) {
-  const {
-    createTransaction,
-  } = useTreasury();
+  const { createTransaction } = useTreasury();
+  
+  // 1. Inicializamos el verificador de logros
+  const { checkAchievements } = useAchievementCheck();
 
-  const fields: Field[] =
-    useMemo(
-      () => [
-        {
-          name: "description",
-
-          label: "Descripción",
-
-          type: "text",
-
-          placeholder:
-            "Ej: Compra de insumos",
-        },
-
-        {
-  name: "amount",
-  label: "Monto",
-  type: "text",
-  placeholder: "10000",
-
-  keyboardType: "number-pad",
-
-  numbersOnly: true,
-
-  required: true,
-},
-
-        {
-  name: "category",
-
-  label: "Categoría",
-
-  type: "select",
-
-  placeholder: "Seleccionar categoría",
-
-  required: true,
-
-          options: [
-            {
-              label: "General",
-
-              value: "general",
-            },
-
-            {
-              label: "Servicios",
-
-              value: "services",
-            },
-
-            {
-              label: "Compras",
-
-              value: "shopping",
-            },
-
-            {
-              label: "Eventos",
-
-              value: "events",
-            },
-          ],
-        },
-
-        {
-  name:"type",
-
-  label:"Tipo",
-
-  type:"segmented",
-
-  required:true,
-
-  options:[
+  const fields: Field[] = useMemo(
+    () => [
       {
-        label:"Ingreso",
-        value:"income"
+        name: "description",
+        label: "Descripción",
+        type: "text",
+        placeholder: "Ej: Compra de insumos",
       },
       {
-        label:"Gasto",
-        value:"expense"
-      }
-  ]
-},
-
-        {
-          name: "isScheduled",
-
-          label:
-            "Programar movimiento",
-
-          type: "boolean",
+        name: "amount",
+        label: "Monto",
+        type: "text",
+        placeholder: "10000",
+        keyboardType: "number-pad",
+        numbersOnly: true,
+        required: true,
+      },
+      {
+        name: "category",
+        label: "Categoría",
+        type: "select",
+        placeholder: "Seleccionar categoría",
+        required: true,
+        options: [
+          { label: "General", value: "general" },
+          { label: "Servicios", value: "services" },
+          { label: "Compras", value: "shopping" },
+          { label: "Eventos", value: "events" },
+        ],
+      },
+      {
+        name: "type",
+        label: "Tipo",
+        type: "segmented",
+        required: true,
+        options: [
+          { label: "Ingreso", value: "income" },
+          { label: "Gasto", value: "expense" },
+        ],
+      },
+      {
+        name: "isScheduled",
+        label: "Programar movimiento",
+        type: "boolean",
+      },
+      {
+        name: "scheduledFor",
+        label: "Fecha programada",
+        type: "date",
+        visibleWhen: {
+          field: "isScheduled",
+          equals: true,
         },
+      },
+    ],
+    [],
+  );
 
-        {
-    name:"scheduledFor",
-
-    label:"Fecha programada",
-
-    type:"date",
-
-    visibleWhen:{
-        field:"isScheduled",
-        equals:true
-    }
-},
-      ],
-      [],
-    );
-
-  async function handleSubmit(
-    values: Record<string, any>,
-  ) {
+  async function handleSubmit(values: Record<string, any>) {
     try {
-      const amount =
-        parseFloat(
-          values.amount || "0",
-        );
+      const amount = parseFloat(values.amount || "0");
+      const isScheduled = values.isScheduled || false;
+      const now = new Date().toISOString();
 
-      const isScheduled =
-        values.isScheduled ||
-        false;
-
-      const now =
-        new Date().toISOString();
-
+      // Guardamos el movimiento en la base de datos
       await createTransaction({
-        cashboxId:
-          cashbox.id,
-
-        description:
-          values.description || "",
-
+        cashboxId: cashbox.id,
+        description: values.description || "",
         amount,
-
-        category:
-          values.category ||
-          "general",
-
-        type:
-          values.type ||
-          "expense",
-
-        status: isScheduled
-          ? "pending"
-          : "confirmed",
-
+        category: values.category || "general",
+        type: values.type || "expense",
+        status: isScheduled ? "pending" : "confirmed",
         createdAt: now,
-
         scheduledFor:
-          isScheduled &&
-          values.scheduledFor
-            ? values.scheduledFor instanceof
-              Date
+          isScheduled && values.scheduledFor
+            ? values.scheduledFor instanceof Date
               ? values.scheduledFor.toISOString()
               : values.scheduledFor
             : null,
       });
 
+      // 2. 🔥 Lanzamos la comprobación de logros para transacciones bancarias/financieras
+      // Calculamos de forma reactiva cuántas transacciones tiene ahora la caja chica (+1 de la actual)
+      // cashbox.transactions may not be declared on the Cashbox type, use a safe any cast
+      const currentTransactionsCount = ((Array.isArray((cashbox as any).transactions)
+        ? (cashbox as any).transactions.length
+        : 0) || 0) + 1;
+      
+      await checkAchievements("transactions", currentTransactionsCount);
+
       onClose();
     } catch (error) {
-      console.log(error);
+      console.log("Error al crear transacción o validar logros:", error);
     }
   }
 
@@ -209,55 +135,40 @@ export default function CreateTransactionModal({
       <View
         style={{
           flex: 1,
-
-          backgroundColor:
-            "rgba(0,0,0,0.4)",
-
+          backgroundColor: "rgba(0,0,0,0.4)",
           justifyContent: "flex-end",
         }}
       >
         <View
           style={{
             backgroundColor: "#FFF",
-
             borderTopLeftRadius: 28,
-
             borderTopRightRadius: 28,
-
             maxHeight: "90%",
           }}
         >
           <View
             style={{
               flexDirection: "row",
-
-              justifyContent:
-                "space-between",
-
+              justifyContent: "space-between",
               alignItems: "center",
-
               padding: 24,
-
               paddingBottom: 12,
             }}
           >
             <Text
               style={{
                 fontSize: 24,
-
                 fontWeight: "700",
               }}
             >
               Nuevo movimiento
             </Text>
 
-            <TouchableOpacity
-              onPress={onClose}
-            >
+            <TouchableOpacity onPress={onClose}>
               <Text
                 style={{
                   fontSize: 28,
-
                   color: "#6B7280",
                 }}
               >
@@ -269,19 +180,12 @@ export default function CreateTransactionModal({
           <ScrollView
             contentContainerStyle={{
               padding: 24,
-
               paddingTop: 0,
-
               paddingBottom: 40,
             }}
-            showsVerticalScrollIndicator={
-              false
-            }
+            showsVerticalScrollIndicator={false}
           >
-            <DynamicForm
-              fields={fields}
-              onSubmit={handleSubmit}
-            />
+            <DynamicForm fields={fields} onSubmit={handleSubmit} />
           </ScrollView>
         </View>
       </View>

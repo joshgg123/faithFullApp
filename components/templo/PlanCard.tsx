@@ -8,6 +8,8 @@ import {
   View,
 } from "react-native";
 
+import { useAchievementCheck } from "@/hooks/useAchievementCheck"; // 🏆 Importamos el hook genérico de logros
+
 /* ==========================================
    Imágenes por categoría — al azar por intento
 ========================================== */
@@ -88,10 +90,26 @@ export function PlanCard({ intento, onPress }: PlanCardProps) {
     [intento.category, intento.id],
   );
 
+  // 🔥 Inicializamos nuestro motor verificador de logros
+  const { checkAchievements } = useAchievementCheck();
+
+  const handleCardPress = async () => {
+    // 1. Ejecuta la navegación o acción original provista por el padre
+    onPress(intento);
+
+    try {
+      // 2. 🔥 Dispara de fondo el validador de metas diarias / primer día
+      // El hook comprobará en Firestore si sumaste un progreso y lanzará el banner global si corresponde
+      await checkAchievements("tasks_completed");
+    } catch (error) {
+      console.error("Error al verificar logros desde la tarjeta de plan:", error);
+    }
+  };
+
   return (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => onPress(intento)}
+      onPress={handleCardPress} // Redireccionamos el click al handler modificado
       activeOpacity={0.8}
     >
       {/* Thumbnail */}

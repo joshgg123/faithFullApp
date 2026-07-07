@@ -21,6 +21,8 @@ import { UserLogro, UserStreak } from "@/types/insignia";
 import { db } from "@/services/firebaseService";
 import { collection, onSnapshot, query } from "firebase/firestore";
 
+import { useAchievementCheck } from "@/hooks/useAchievementCheck"; // 🏆 Importamos tu validador genérico
+
 import {
   updateStreak,
 } from "@/services/insigniasservice";
@@ -41,6 +43,9 @@ export default function HomeScreen() {
   const [rachaVisible, setRachaVisible] = useState(false);
   const [logrosVisible, setLogrosVisible] = useState(false);
 
+  // 🔥 Inicializamos el hook siguiendo las reglas de React
+  const { checkAchievements } = useAchievementCheck();
+
   // 1. Obtener nombre del usuario
   useEffect(() => {
     async function fetchUserName() {
@@ -51,7 +56,7 @@ export default function HomeScreen() {
     fetchUserName();
   }, []);
 
-  // 2. 🔥 OBSERVADOR EN TIEMPO REAL: Sincroniza los logros y actualiza el contador al instante
+  // 2. OBSERVADOR EN TIEMPO REAL: Sincroniza los logros y actualiza el contador al instante
   useEffect(() => {
     const logrosRef = collection(db, "USUARIO", HARDCODED_USER_ID, "LOGROS");
     const q = query(logrosRef);
@@ -70,15 +75,20 @@ export default function HomeScreen() {
     return () => unsubscribe();
   }, []);
 
-  // 3. Cargar la racha (y quitar la carga estática de logros anteriores)
+  // 3. Cargar la racha y validar logros por racha acumulada
   useEffect(() => {
     async function loadStreakData() {
       setLoading(true);
       try {
+        // Actualiza y trae los datos de racha (manejando internamente el reseteo a 0 si corresponde)
         const streakData = await updateStreak();
         setStreak(streakData);
+
+        // 🔥 Lanzamos la comprobación de logros basados en los días de racha obtenidos
+        await checkAchievements("streak");
+        
       } catch (error) {
-        console.error("Error al cargar racha:", error);
+        console.error("Error al cargar racha o verificar logros:", error);
       } finally {
         setLoading(false);
       }
@@ -87,7 +97,7 @@ export default function HomeScreen() {
     loadStreakData();
   }, []);
 
-  // ⚡ El conteo se recalcula solo cada vez que 'localLogros' cambie en Firestore
+  // El conteo se recalcula solo cada vez que 'localLogros' cambie en Firestore
   const unlockedCount = localLogros.filter((l) => l.unlocked).length;
 
   return (
@@ -114,7 +124,6 @@ export default function HomeScreen() {
                 streakDays={streak.streakDays}
                 onPress={() => setRachaVisible(true)}
               />
-              {/* El botón ahora reflejará el cambio al milisegundo */}
               <LogrosButton
                 unlockedCount={unlockedCount}
                 totalCount={localLogros.length}
