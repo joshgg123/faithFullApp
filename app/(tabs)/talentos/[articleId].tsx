@@ -1,3 +1,5 @@
+import { AppText as Text } from "@/components/ui/AppText";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -7,8 +9,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { AppText as Text } from "@/components/ui/AppText";
-import { router, useLocalSearchParams } from "expo-router";
 import Markdown from "react-native-markdown-display";
 
 import { useAchievementCheck } from "@/hooks/useAchievementCheck"; // Hook importado correctamente
@@ -18,8 +18,8 @@ import {
   guardarArticuloLeido,
 } from "@/services/talentosServices/talentos";
 
-import { Article } from "@/types/talentos/article";
 import { appColors } from "@/constants/colors";
+import { Article } from "@/types/talentos/article";
 
 export default function ArticleDetailScreen() {
   const { articleId, from } = useLocalSearchParams<{
@@ -118,19 +118,40 @@ export default function ArticleDetailScreen() {
               color: appColors.text,
               fontSize: 17,
               lineHeight: 28,
+              fontFamily: "Satoshi-Regular",
             },
             heading1: {
               color: appColors.text,
               fontSize: 30,
               marginBottom: 16,
+              fontFamily: "Satoshi-Regular",
             },
             heading2: {
               color: appColors.text,
               fontSize: 24,
               marginTop: 24,
+              fontFamily: "Satoshi-Regular",
             },
             paragraph: {
               marginBottom: 14,
+              fontFamily: "Satoshi-Regular",
+            },
+            strong: {
+              fontFamily: "Satoshi-Regular",
+              fontWeight: "700",
+            },
+            em: {
+              fontFamily: "Satoshi-Regular",
+              fontStyle: "italic",
+            },
+            list_item: {
+              fontFamily: "Satoshi-Regular",
+              marginBottom: 8,
+            },
+            link: {
+              color: appColors.primary,
+              textDecorationLine: "underline",
+              fontFamily: "Satoshi-Regular",
             },
             image: {
               borderRadius: 12,

@@ -4,15 +4,15 @@ import {
   SafeAreaView,
   ScrollView,
   TextInput,
-  View,
   TouchableOpacity,
+  View,
 } from "react-native";
 
-import {router} from "expo-router";
 import ArticleCarousel2 from "@/components/globales/carousel/ArticlesCarousel2";
 import { TalentsOnboarding } from "@/components/talentos/TalentsOnboarding";
-import useTalents from "@/hooks/useTalents";
 import { AppText as Text } from "@/components/ui/AppText";
+import useTalents from "@/hooks/useTalents";
+import { router } from "expo-router";
 
 export default function DescubrirScreen() {
   const { loading, profile, carousels, saveInterests } = useTalents();
@@ -100,12 +100,16 @@ export default function DescubrirScreen() {
               setSearchMode(text.length > 0);
             }}
             placeholder="Buscar artículos..."
+            placeholderTextColor="#9CA3AF"
             style={{
               flex: 1,
               borderWidth: 1,
               borderColor: "#E5E7EB",
               borderRadius: 14,
               padding: 12,
+              fontFamily: "Satoshi-Regular",
+              fontSize: 15,
+              color: "#111827",
             }}
           />
 
@@ -120,7 +124,7 @@ export default function DescubrirScreen() {
                 paddingHorizontal: 12,
               }}
             >
-              <Text style={{ color: "#7C3AED", fontWeight: "600" }}>
+              <Text style={{ color: "#7C3AED", fontWeight: "600", fontFamily: "Satoshi-Regular" }}>
                 Limpiar
               </Text>
             </TouchableOpacity>
