@@ -1,11 +1,17 @@
 import { AppText as Text } from "@/components/ui/AppText";
-import { TouchableOpacity, StyleSheet } from "react-native";
+import { Theme } from "@/constants/theme/index";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useMemo } from "react";
+import { StyleSheet, TouchableOpacity } from "react-native";
 
 interface Props {
   onPress: () => void;
 }
 
 export default function FloatingActionButton({ onPress }: Props) {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   return (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -17,27 +23,24 @@ export default function FloatingActionButton({ onPress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  button: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#111827",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    button: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      backgroundColor: theme.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: theme.primaryBright,
+      shadowOpacity: 1,
+      shadowRadius: 10,
+      elevation: 8,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
-  },
-  text: {
-    color: "#FFF",
-    fontSize: 32,
-    fontWeight: "300",
-    marginTop: -4, // Centra verticalmente el símbolo "+" de manera perfecta
-  },
-});
+    text: {
+      color: theme.textInverse,
+      fontSize: 32,
+      fontWeight: "300",
+      marginTop: -4,
+    },
+  });

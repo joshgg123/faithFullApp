@@ -1,29 +1,35 @@
+import { AppText as Text } from "@/components/ui/AppText";
+import { Theme } from "@/constants/theme/index";
+import { useTheme } from "@/contexts/ThemeContext";
+import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
+  StyleSheet,
   TouchableOpacity,
   View,
-  StyleSheet,
 } from "react-native";
-import { AppText as Text } from "@/components/ui/AppText";
-import { router } from "expo-router";
 
-import SummaryCard from "@/components/tesoros/SummaryCard";
 import BalanceEvolutionChart from "@/components/tesoros/BalanceEvolutionChart";
-import TransactionDetailModal from "@/components/tesoros/TransactionModalDetail";
-import TransactionList from "@/components/tesoros/TransactionList";
-import FloatingActionButton from "@/components/tesoros/FloatingActionButton";
-import CreateTransactionModal from "@/components/tesoros/CreateTransactionModal";
 import CloseCashboxModal from "@/components/tesoros/CloseCashboxModal";
+import CreateTransactionModal from "@/components/tesoros/CreateTransactionModal";
+import FloatingActionButton from "@/components/tesoros/FloatingActionButton";
+import SummaryCard from "@/components/tesoros/SummaryCard";
+import TransactionList from "@/components/tesoros/TransactionList";
+import TransactionDetailModal from "@/components/tesoros/TransactionModalDetail";
 
 import useTreasury from "@/contexts/TesoroContext";
 import { Transaction } from "@/types/tesoros/transaction";
 
 export default function TreasuryScreen() {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   const { loading, cashbox, balance, transactions } = useTreasury();
 
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<Transaction | null>(null);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [closeModalVisible, setCloseModalVisible] = useState(false);
 
@@ -56,7 +62,7 @@ export default function TreasuryScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#60A5FA" />
+        <ActivityIndicator size="large" color={theme.primary} />
       </View>
     );
   }
@@ -64,7 +70,7 @@ export default function TreasuryScreen() {
   if (!cashbox) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={{ color: "#FFF" }}>No hay una caja activa</Text>
+        <Text style={{ color: theme.text }}>No hay una caja activa</Text>
       </View>
     );
   }
@@ -76,29 +82,7 @@ export default function TreasuryScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* TÍTULO PRINCIPAL: Finanzas corregido */}
-        <Text style={styles.mainScreenTitle}>
-          Finanzas
-        </Text>
-
-        {/* HEADER CON BOTONES */}
-        <View style={styles.headerButtonsRow}>
-          {/* HISTORY */}
-          <TouchableOpacity
-            onPress={() => router.push("/(tabs)/tesoros/history")}
-            style={styles.headerButton}
-          >
-            <Text style={styles.headerButtonText}>Historial</Text>
-          </TouchableOpacity>
-
-          {/* CLOSE */}
-          <TouchableOpacity
-            onPress={() => setCloseModalVisible(true)}
-            style={styles.headerButton}
-          >
-            <Text style={styles.headerButtonText}>Cerrar caja</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.mainScreenTitle}>Finanzas</Text>
 
         <SummaryCard
           cashbox={cashbox}
@@ -108,9 +92,24 @@ export default function TreasuryScreen() {
           totalExpense={totalExpense}
         />
 
+        <View style={styles.headerButtonsRow}>
+          <TouchableOpacity
+            onPress={() => router.push("/(tabs)/tesoros/history")}
+            style={styles.headerButton}
+          >
+            <Text style={styles.headerButtonText}>Historial</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setCloseModalVisible(true)}
+            style={styles.headerButton}
+          >
+            <Text style={styles.headerButtonText}>Cerrar caja</Text>
+          </TouchableOpacity>
+        </View>
+
         <BalanceEvolutionChart transactions={transactions} />
 
-        {/* MOVEMENTS HEADER */}
         <View style={styles.movementsHeaderRow}>
           <Text style={styles.movementsTitle}>Movimientos</Text>
 
@@ -132,7 +131,6 @@ export default function TreasuryScreen() {
         />
       </ScrollView>
 
-      {/* MODALS */}
       <TransactionDetailModal
         visible={selectedTransaction !== null}
         transaction={selectedTransaction}
@@ -153,7 +151,6 @@ export default function TreasuryScreen() {
         onSuccess={() => setCloseModalVisible(false)}
       />
 
-      {/* CONTENEDOR SEGURO PARA EL BOTÓN + */}
       <View style={styles.fabContainer} pointerEvents="box-none">
         <FloatingActionButton onPress={() => setCreateModalVisible(true)} />
       </View>
@@ -161,68 +158,73 @@ export default function TreasuryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1,
-    backgroundColor: "#bab9b9d4",
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#1F2937",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingTop: 24,
-    paddingBottom: 120,
-  },
-  mainScreenTitle: {
-    fontSize: 26,
-    fontWeight: "700",
-    color: "#111827",
-    marginTop: 8,       // Espacio superior seguro
-    marginBottom: 16,   // ¡Aquí le damos aire antes de los botones!
-  },
-  headerButtonsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  headerButton: {
-    backgroundColor: "#111827",
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 18,
-  },
-  headerButtonText: {
-    color: "#FFF",
-    fontWeight: "600",
-  },
-  movementsHeaderRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-    marginTop: 8,
-  },
-  movementsTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  viewMoreText: {
-    color: "#2563EB",
-    fontWeight: "600",
-  },
-  fabContainer: {
-    position: "absolute",
-    bottom: 24,
-    right: 24,
-    zIndex: 999,
-  },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    mainContainer: {
+      flex: 1,
+      backgroundColor: theme.background,
+      margin: 5,
+    },
+    centerContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: theme.background,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      padding: 16,
+      paddingTop: 24,
+      paddingBottom: 120,
+    },
+    mainScreenTitle: {
+      fontSize: 32,
+      fontWeight: "800",
+      color: theme.text,
+      marginTop: 8,
+      marginBottom: 16,
+      textAlign: "center",
+    },
+    headerButtonsRow: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 7,
+      marginBottom: 24,
+    },
+    headerButton: {
+      backgroundColor: theme.primary,
+      paddingHorizontal: 18,
+      paddingVertical: 12,
+      borderRadius: 18,
+      marginHorizontal: 8,
+    },
+    headerButtonText: {
+      color: theme.textInverse,
+      fontWeight: "600",
+    },
+    movementsHeaderRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 16,
+      marginTop: 8,
+    },
+    movementsTitle: {
+      fontSize: 22,
+      fontWeight: "700",
+      color: theme.text,
+    },
+    viewMoreText: {
+      color: theme.primary,
+      fontWeight: "600",
+    },
+    fabContainer: {
+      position: "absolute",
+      bottom: 24,
+      right: 24,
+      zIndex: 999,
+    },
+  });

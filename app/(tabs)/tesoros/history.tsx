@@ -1,42 +1,36 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   ActivityIndicator,
   ScrollView,
+  StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
 
 import { AppText as Text } from "@/components/ui/AppText";
-
+import { Theme } from "@/constants/theme/index";
+import { useTheme } from "@/contexts/ThemeContext";
+import { getCashboxes } from "@/services/tesorosServices/tesoros";
+import { Cashbox } from "@/types/tesoros/cashbox";
 import { router } from "expo-router";
 
-import { getCashboxes } from "@/services/tesorosServices/tesoros";
-
-import { Cashbox } from "@/types/tesoros/cashbox";
-
 export default function CashboxesHistoryScreen() {
-  const [loading, setLoading] =
-    useState(true);
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const [cashboxes, setCashboxes] =
-    useState<Cashbox[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [cashboxes, setCashboxes] = useState<Cashbox[]>([]);
 
   async function loadCashboxes() {
     try {
       setLoading(true);
 
-      const data =
-        await getCashboxes();
+      const data = await getCashboxes();
 
       const sorted = data.sort(
         (a, b) =>
-          new Date(
-            b.createdAt,
-          ).getTime() -
-          new Date(
-            a.createdAt,
-          ).getTime(),
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
 
       setCashboxes(sorted);
@@ -53,179 +47,56 @@ export default function CashboxesHistoryScreen() {
 
   if (loading) {
     return (
-      <View
-        style={{
-          flex: 1,
-
-          justifyContent: "center",
-
-          alignItems: "center",
-
-          backgroundColor:
-            "#1F2937",
-        }}
-      >
-        <ActivityIndicator />
+      <View style={styles.centerContainer}>
+        <ActivityIndicator color={theme.primary} />
       </View>
     );
   }
 
   return (
     <ScrollView
-      style={{
-        flex: 1,
-
-        backgroundColor:
-          "#1F2937",
-      }}
-      contentContainerStyle={{
-        padding: 16,
-
-        paddingBottom: 40,
-      }}
-      showsVerticalScrollIndicator={
-        false
-      }
+      style={styles.screen}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
     >
-      {/* HEADER */}
-      <View
-        style={{
-          flexDirection: "row",
-
-          alignItems: "center",
-
-          gap: 16,
-
-          marginBottom: 24,
-        }}
-      >
-        <TouchableOpacity
-          onPress={() =>
-            router.back()
-          }
-        >
-          <Text
-            style={{
-              color: "#FFF",
-
-              fontSize: 22,
-            }}
-          >
-            ←
-          </Text>
+      <View style={styles.headerRow}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={styles.backIcon}>←</Text>
         </TouchableOpacity>
 
-        <Text
-          style={{
-            fontSize: 30,
-
-            fontWeight: "700",
-
-            color: "#FFF",
-          }}
-        >
-          Historial
-        </Text>
+        <Text style={styles.headerTitle}>Historial</Text>
       </View>
 
       {cashboxes.map((cashbox) => {
-        const isOpen =
-          cashbox.status === "open";
+        const isOpen = cashbox.status === "open";
 
         return (
           <TouchableOpacity
             key={cashbox.id}
             onPress={() =>
               router.push({
-  pathname:
-    "/(tabs)/tesoros/[cashboxId]",
-
-  params: {
-    cashboxId: cashbox.id,
-  },
-})
+                pathname: "/(tabs)/tesoros/[cashboxId]",
+                params: { cashboxId: cashbox.id },
+              })
             }
-            style={{
-              backgroundColor:
-                "#111827",
-
-              borderRadius: 24,
-
-              padding: 20,
-
-              marginBottom: 16,
-            }}
+            style={styles.card}
           >
-            <Text
-              style={{
-                color: "#FFF",
-
-                fontSize: 20,
-
-                fontWeight: "700",
-
-                marginBottom: 8,
-              }}
-            >
-              {cashbox.name}
-            </Text>
+            <Text style={styles.cardTitle}>{cashbox.name}</Text>
 
             <View
-              style={{
-                alignSelf:
-                  "flex-start",
-
-                backgroundColor:
-                  isOpen
-                    ? "#166534"
-                    : "#374151",
-
-                paddingHorizontal: 12,
-
-                paddingVertical: 6,
-
-                borderRadius: 999,
-              }}
+              style={[
+                styles.badge,
+                { backgroundColor: isOpen ? theme.success : theme.primaryBright },
+              ]}
             >
-              <Text
-                style={{
-                  color: "#FFF",
-
-                  fontWeight: "600",
-
-                  fontSize: 12,
-                }}
-              >
-                {isOpen
-                  ? "ACTIVA"
-                  : "CERRADA"}
+              <Text style={styles.badgeText}>
+                {isOpen ? "ACTIVA" : "CERRADA"}
               </Text>
             </View>
 
-            <Text
-              style={{
-                color: "#9CA3AF",
-
-                marginTop: 18,
-              }}
-            >
-              Balance final
-            </Text>
-
-            <Text
-              style={{
-                color: "#FFF",
-
-                fontSize: 28,
-
-                fontWeight: "700",
-              }}
-            >
-              $
-              {(
-                cashbox.finalBalance ??
-                0
-              ).toFixed(2)}
+            <Text style={styles.cardLabel}>Balance final</Text>
+            <Text style={styles.cardBalance}>
+              ${(cashbox.finalBalance ?? 0).toFixed(2)}
             </Text>
           </TouchableOpacity>
         );
@@ -233,3 +104,68 @@ export default function CashboxesHistoryScreen() {
     </ScrollView>
   );
 }
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+    centerContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: theme.background,
+    },
+    scrollContent: {
+      padding: 16,
+      paddingBottom: 40,
+    },
+    headerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 16,
+      marginBottom: 24,
+    },
+    backIcon: {
+      color: theme.text,
+      fontSize: 22,
+    },
+    headerTitle: {
+      fontSize: 30,
+      fontWeight: "700",
+      color: theme.text,
+    },
+    card: {
+      backgroundColor: theme.primary,
+      borderRadius: 24,
+      padding: 20,
+      marginBottom: 16,
+    },
+    cardTitle: {
+      color: theme.textInverse,
+      fontSize: 20,
+      fontWeight: "700",
+      marginBottom: 8,
+    },
+    badge: {
+      alignSelf: "flex-start",
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 999,
+    },
+    badgeText: {
+      color: theme.textInverse,
+      fontWeight: "600",
+      fontSize: 12,
+    },
+    cardLabel: {
+      color: theme.primaryBright,
+      marginTop: 18,
+    },
+    cardBalance: {
+      color: theme.textInverse,
+      fontSize: 28,
+      fontWeight: "700",
+    },
+  });

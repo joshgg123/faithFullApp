@@ -6,11 +6,11 @@ import {
   View,
 } from "react-native";
 
-import { AppText as Text } from "@/components/ui/AppText";
 import DynamicForm from "@/components/general/DynamicForm";
+import { AppText as Text } from "@/components/ui/AppText";
 import useTreasury from "@/contexts/TesoroContext";
-import { Cashbox } from "@/types/tesoros/cashbox";
 import { Field } from "@/types/general/field";
+import { Cashbox } from "@/types/tesoros/cashbox";
 
 import { useAchievementCheck } from "@/hooks/useAchievementCheck"; // 🏆 Importamos tu hook dinámico
 

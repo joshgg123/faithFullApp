@@ -1,16 +1,15 @@
 import { AppText as Text } from "@/components/ui/AppText";
+import { Theme } from "@/constants/theme/index";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Cashbox } from "@/types/tesoros/cashbox";
-import { View } from "react-native";
+import { useMemo } from "react";
+import { StyleSheet, View } from "react-native";
 
 interface Props {
   cashbox: Cashbox;
-
   balance: number;
-
   transactionsCount: number;
-
   totalIncome: number;
-
   totalExpense: number;
 }
 
@@ -21,212 +20,138 @@ export default function SummaryCard({
   totalIncome,
   totalExpense,
 }: Props) {
-  const positive =
-    balance >= 0;
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  const positive = balance >= 0;
 
   return (
-    <View
-      style={{
-        backgroundColor: "#111827",
+    <View style={styles.card}>
+      <Text style={styles.label}>Balance actual</Text>
 
-        borderRadius: 28,
-
-        padding: 24,
-
-        marginBottom: 24,
-      }}
-    >
-      <Text
-        style={{
-          color: "#9CA3AF",
-
-          fontSize: 14,
-
-          marginBottom: 12,
-        }}
-      >
-        Balance actual
-      </Text>
-
-      <Text
-        style={{
-          color: "#FFF",
-
-          fontSize: 38,
-
-          fontWeight: "700",
-        }}
-      >
-        $
-        {balance.toLocaleString()}
-      </Text>
-
-      <Text
-        style={{
-          color: positive
-            ? "#22C55E"
-            : "#EF4444",
-
-          marginTop: 6,
-        }}
-      >
-        {positive
-          ? "Balance positivo"
-          : "Balance negativo"}
-      </Text>
+      <Text style={styles.balance}>${balance.toLocaleString()}</Text>
 
       <View
-        style={{
-          height: 1,
-
-          backgroundColor:
-            "rgba(255,255,255,0.1)",
-
-          marginVertical: 20,
-        }}
-      />
-
-      <View
-        style={{
-          flexDirection: "row",
-
-          justifyContent:
-            "space-between",
-        }}
+        style={[
+          styles.statusCard,
+          { backgroundColor: positive ? theme.success : theme.error },
+        ]}
       >
+        <Text style={[styles.status]}>
+          {positive ? "Balance positivo" : "Balance negativo"}
+        </Text>
+      </View>
+
+      <View style={styles.divider} />
+
+      <View style={styles.row}>
         <View>
-          <Text
-            style={{
-              color: "#9CA3AF",
-
-              marginBottom: 4,
-            }}
-          >
-            Caja
-          </Text>
-
-          <Text
-            style={{
-              color: "#FFF",
-
-              fontWeight: "600",
-            }}
-          >
-            {cashbox.name}
-          </Text>
+          <Text style={styles.label}>Caja</Text>
+          <Text style={styles.value}>{cashbox.name}</Text>
         </View>
 
         <View>
-          <Text
-            style={{
-              color: "#9CA3AF",
-
-              marginBottom: 4,
-            }}
-          >
-            Movimientos
-          </Text>
-
-          <Text
-            style={{
-              color: "#FFF",
-
-              fontWeight: "600",
-
-              textAlign: "right",
-            }}
-          >
+          <Text style={styles.label}>Movimientos</Text>
+          <Text style={[styles.value, { textAlign: "right" }]}>
             {transactionsCount}
           </Text>
         </View>
       </View>
 
-      <View
-        style={{
-          flexDirection: "row",
-
-          justifyContent:
-            "space-between",
-
-          marginTop: 24,
-        }}
-      >
-        <View
-          style={{
-            flex: 1,
-
-            backgroundColor:
-              "rgba(34,197,94,0.15)",
-
-            padding: 16,
-
-            borderRadius: 18,
-
-            marginRight: 8,
-          }}
-        >
-          <Text
-            style={{
-              color: "#86EFAC",
-
-              marginBottom: 6,
-            }}
-          >
-            Ingresos
-          </Text>
-
-          <Text
-            style={{
-              color: "#FFF",
-
-              fontWeight: "700",
-
-              fontSize: 18,
-            }}
-          >
-            $
-            {totalIncome.toLocaleString()}
+      <View style={[styles.row, { marginTop: 24 }]}>
+        <View style={[styles.pill, styles.pillIncome]}>
+          <Text style={styles.pillLabelIncome}>Ingresos ▲</Text>
+          <Text style={styles.pillValueIncome}>
+            ${totalIncome.toLocaleString()}
           </Text>
         </View>
 
-        <View
-          style={{
-            flex: 1,
-
-            backgroundColor:
-              "rgba(239,68,68,0.15)",
-
-            padding: 16,
-
-            borderRadius: 18,
-
-            marginLeft: 8,
-          }}
-        >
-          <Text
-            style={{
-              color: "#FCA5A5",
-
-              marginBottom: 6,
-            }}
-          >
-            Gastos
-          </Text>
-
-          <Text
-            style={{
-              color: "#FFF",
-
-              fontWeight: "700",
-
-              fontSize: 18,
-            }}
-          >
-            $
-            {totalExpense.toLocaleString()}
+        <View style={[styles.pill, styles.pillExpense]}>
+          <Text style={styles.pillLabelExpense}>Gastos ▼</Text>
+          <Text style={styles.pillValueExpense}>
+            ${totalExpense.toLocaleString()}
           </Text>
         </View>
       </View>
     </View>
   );
 }
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: theme.surfaceAlt,
+      borderRadius: 28,
+      padding: 24,
+      marginBottom: 24,
+    },
+    label: {
+      color: theme.textSecondary,
+      fontSize: 14,
+      marginBottom: 10,
+    },
+    balance: {
+      color: theme.textSecondary,
+      fontSize: 38,
+      fontWeight: "800",
+      marginBottom: 5,
+    },
+    statusCard: {
+      alignSelf: "flex-start",
+      borderRadius: 20,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+    },
+    status: {
+      color: theme.textInverse,
+      fontWeight: "700",
+      marginTop: 0,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: "rgba(255,255,255,0.1)",
+      marginVertical: 10,
+    },
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
+    value: {
+      color: theme.text,
+      fontWeight: "600",
+    },
+    pill: {
+      flex: 1,
+      padding: 16,
+      borderRadius: 18,
+    },
+    pillIncome: {
+      backgroundColor: theme.primaryBright,
+      marginRight: 8,
+    },
+    pillExpense: {
+      backgroundColor: theme.primary,
+      marginLeft: 8,
+    },
+    // Tints fijos: pensados para leerse bien sobre la tarjeta oscura de arriba,
+    // no cambian con el tema (a diferencia de theme.success/theme.error).
+    pillLabelIncome: {
+      color: theme.textSecondary,
+      marginBottom: 6,
+      fontWeight: "700",
+    },
+    pillLabelExpense: {
+      color: theme.textInverse,
+      marginBottom: 6,
+    },
+    pillValueIncome: {
+      color: theme.textSecondary,
+      fontWeight: "800",
+      fontSize: 18,
+    },
+    pillValueExpense: {
+      color: theme.textInverse,
+      fontWeight: "800",
+      fontSize: 18,
+    },
+  });

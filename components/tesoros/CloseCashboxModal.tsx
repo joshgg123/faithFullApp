@@ -1,29 +1,26 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { AppText as Text } from "@/components/ui/AppText";
-import {
-  closeAndCreateCashbox,
-} from "@/services/tesorosServices/tesoros";
+import { closeAndCreateCashbox } from "@/services/tesorosServices/tesoros";
 import {
   ActivityIndicator,
   Modal,
+  StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 
+import { Theme } from "@/constants/theme/index";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Cashbox } from "@/types/tesoros/cashbox";
 import { reload } from "expo-router/build/global-state/routing";
 
 interface Props {
   visible: boolean;
-
   cashbox: Cashbox;
-
   balance: number;
-
   onClose: () => void;
-
   onSuccess: () => void;
 }
 
@@ -34,11 +31,11 @@ export default function CloseCashboxModal({
   onClose,
   onSuccess,
 }: Props) {
-  const [loading, setLoading] =
-    useState(false);
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const [newCashboxName, setNewCashboxName] =
-    useState("");
+  const [loading, setLoading] = useState(false);
+  const [newCashboxName, setNewCashboxName] = useState("");
 
   async function handleCloseCashbox() {
     if (!newCashboxName.trim()) {
@@ -48,10 +45,7 @@ export default function CloseCashboxModal({
     try {
       setLoading(true);
 
-      await closeAndCreateCashbox(
-        cashbox.id,
-        newCashboxName,
-      );
+      await closeAndCreateCashbox(cashbox.id, newCashboxName);
 
       setNewCashboxName("");
 
@@ -67,141 +61,37 @@ export default function CloseCashboxModal({
   }
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-    >
-      <View
-        style={{
-          flex: 1,
+    <Modal visible={visible} transparent animationType="fade">
+      <View style={styles.overlay}>
+        <View style={styles.card}>
+          <Text style={styles.title}>Cerrar caja</Text>
 
-          backgroundColor:
-            "rgba(0,0,0,0.4)",
-
-          justifyContent: "center",
-
-          padding: 20,
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: "#FFF",
-
-            borderRadius: 28,
-
-            padding: 24,
-          }}
-        >
-          {/* TITLE */}
-          <Text
-            style={{
-              fontSize: 24,
-
-              fontWeight: "700",
-
-              marginBottom: 10,
-            }}
-          >
-            Cerrar caja
+          <Text style={styles.subtitle}>
+            Balance final: ${balance.toFixed(2)}
           </Text>
 
-          {/* SUBTITLE */}
-          <Text
-            style={{
-              color: "#6B7280",
-
-              marginBottom: 24,
-            }}
-          >
-            Balance final:
-            {" "}
-            ${balance.toFixed(2)}
-          </Text>
-
-          {/* INPUT */}
           <TextInput
             placeholder="Nombre nueva caja"
+            placeholderTextColor={theme.textSecondary}
             value={newCashboxName}
-            onChangeText={
-              setNewCashboxName
-            }
-            style={{
-              backgroundColor:
-                "#F3F4F6",
-
-              borderRadius: 18,
-
-              padding: 16,
-
-              marginBottom: 24,
-            }}
+            onChangeText={setNewCashboxName}
+            style={styles.input}
           />
 
-          {/* ACTIONS */}
-          <View
-            style={{
-              flexDirection: "row",
-
-              gap: 12,
-            }}
-          >
-            {/* CANCEL */}
-            <TouchableOpacity
-              onPress={onClose}
-              style={{
-                flex: 1,
-
-                backgroundColor:
-                  "#E5E7EB",
-
-                padding: 16,
-
-                borderRadius: 18,
-
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  fontWeight: "600",
-                }}
-              >
-                Cancelar
-              </Text>
+          <View style={styles.actions}>
+            <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
+              <Text style={styles.cancelText}>Cancelar</Text>
             </TouchableOpacity>
 
-            {/* CONFIRM */}
             <TouchableOpacity
               disabled={loading}
-              onPress={
-                handleCloseCashbox
-              }
-              style={{
-                flex: 1,
-
-                backgroundColor:
-                  "#ffff",
-
-                padding: 16,
-
-                borderRadius: 18,
-
-                alignItems: "center",
-              }}
+              onPress={handleCloseCashbox}
+              style={styles.confirmButton}
             >
               {loading ? (
-                <ActivityIndicator color="#000000" />
+                <ActivityIndicator color={theme.textInverse} />
               ) : (
-                <Text
-                  style={{
-                    color: "#000000",
-
-                    fontWeight: "600",
-                  }}
-                >
-                  Cerrar y abrir
-                </Text>
+                <Text style={styles.confirmText}>Cerrar y abrir</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -210,3 +100,61 @@ export default function CloseCashboxModal({
     </Modal>
   );
 }
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.4)",
+      justifyContent: "center",
+      padding: 20,
+    },
+    card: {
+      backgroundColor: theme.surface,
+      borderRadius: 28,
+      padding: 24,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: "700",
+      marginBottom: 10,
+      color: theme.text,
+    },
+    subtitle: {
+      color: theme.textSecondary,
+      marginBottom: 24,
+    },
+    input: {
+      backgroundColor: theme.surfaceAlt,
+      color: theme.text,
+      borderRadius: 18,
+      padding: 16,
+      marginBottom: 24,
+    },
+    actions: {
+      flexDirection: "row",
+      gap: 12,
+    },
+    cancelButton: {
+      flex: 1,
+      backgroundColor: theme.border,
+      padding: 16,
+      borderRadius: 18,
+      alignItems: "center",
+    },
+    cancelText: {
+      fontWeight: "600",
+      color: theme.text,
+    },
+    confirmButton: {
+      flex: 1,
+      backgroundColor: theme.primary,
+      padding: 16,
+      borderRadius: 18,
+      alignItems: "center",
+    },
+    confirmText: {
+      color: theme.textInverse,
+      fontWeight: "600",
+    },
+  });
