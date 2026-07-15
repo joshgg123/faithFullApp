@@ -6,7 +6,7 @@ import { Theme } from "@/constants/theme/index";
 import { useTheme } from "@/contexts/ThemeContext";
 import useTreasury from "@/hooks/useTreasury";
 
-const DAYS_LABELS = ["L", "M", "M", "J", "J", "V", "S", "D"];
+const DAYS_LABELS = ["L", "M", "M", "J", "V", "S", "D"];
 
 export function FinanceSummaryCard() {
   const { theme } = useTheme();

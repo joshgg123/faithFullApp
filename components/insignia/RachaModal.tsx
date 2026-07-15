@@ -1,5 +1,7 @@
 import { AppText as Text } from "@/components/ui/AppText";
-import React from "react";
+import { Theme } from "@/constants/theme/index";
+import { useTheme } from "@/contexts/ThemeContext";
+import React, { useMemo } from "react";
 import {
   Dimensions,
   Modal,
@@ -8,17 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-/*
- * Lottie solo en nativo (iOS/Android).
- * En web usamos emoji de fuego para evitar el error
- * de @lottiefiles/dotlottie-react en el bundler web.
- *
- * Cuando quieras testear en dispositivo físico o emulador,
- * Lottie va a funcionar automáticamente.
- *
- * Animación: bajala de https://lottiefiles.com/search?q=fire
- * y guardala en assets/animations/fire.json
- */
+
 let LottieView: any = null;
 if (Platform.OS !== "web") {
   LottieView = require("lottie-react-native").default;
@@ -27,8 +19,15 @@ if (Platform.OS !== "web") {
 const { width } = Dimensions.get("window");
 const DAYS = ["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"];
 
-/* ── Calendario semanal ── */
-function WeekCalendar({ streakDays }: { streakDays: number }) {
+function WeekCalendar({
+  streakDays,
+  theme,
+}: {
+  streakDays: number;
+  theme: Theme;
+}) {
+  const cal = useMemo(() => createCalStyles(theme), [theme]);
+
   const today = new Date();
   const todayIndex = today.getDay();
   const daysThisWeek = Math.min(streakDays, todayIndex + 1);
@@ -72,35 +71,42 @@ function WeekCalendar({ streakDays }: { streakDays: number }) {
   );
 }
 
-const cal = StyleSheet.create({
-  container: { width: "100%", marginTop: 16, paddingHorizontal: 4 },
-  monthRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-  monthText: { color: "#FFF", fontSize: 14, fontWeight: "600", textTransform: "capitalize" },
-  arrow: { padding: 4 },
-  arrowText: { color: "#AAA", fontSize: 22, lineHeight: 24 },
-  daysRow: { flexDirection: "row", justifyContent: "space-between" },
-  dayCol: { alignItems: "center", gap: 6 },
-  dayLabel: { fontSize: 9, color: "#666", fontWeight: "600" },
-  dayCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: "#2A2A2A",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  dayCircleCompleted: { backgroundColor: "#E8611A22", borderColor: "#E8611A" },
-  dayCircleToday: { borderColor: "#FFF" },
-  checkmark: { color: "#E8611A", fontSize: 14, fontWeight: "800" },
-});
+const createCalStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: { width: "100%", marginTop: 16, paddingHorizontal: 4 },
+    monthRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 10,
+    },
+    monthText: {
+      color: theme.text,
+      fontSize: 14,
+      fontWeight: "600",
+      textTransform: "capitalize",
+    },
+    arrow: { padding: 4 },
+    arrowText: { color: theme.textSecondary, fontSize: 22, lineHeight: 24 },
+    daysRow: { flexDirection: "row", justifyContent: "space-between" },
+    dayCol: { alignItems: "center", gap: 6 },
+    dayLabel: { fontSize: 9, color: theme.textSecondary, fontWeight: "600" },
+    dayCircle: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      borderWidth: 1.5,
+      borderColor: theme.accentSoft,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    dayCircleCompleted: {
+      backgroundColor: theme.primaryBright,
+    },
+    dayCircleToday: { backgroundColor: theme.primary },
+    checkmark: { color: theme.textInverse, fontSize: 14, fontWeight: "800" },
+  });
 
-/* ── RachaModal ── */
 interface RachaModalProps {
   visible: boolean;
   streakDays: number;
@@ -108,6 +114,8 @@ interface RachaModalProps {
 }
 
 export function RachaModal({ visible, streakDays, onClose }: RachaModalProps) {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const isWeb = Platform.OS === "web";
 
   return (
@@ -124,7 +132,6 @@ export function RachaModal({ visible, streakDays, onClose }: RachaModalProps) {
           </View>
 
           <View style={styles.fireSection}>
-            {/* Lottie en nativo, emoji en web */}
             {!isWeb && LottieView ? (
               <LottieView
                 source={require("@/assets/animations/fire.json")}
@@ -139,51 +146,60 @@ export function RachaModal({ visible, streakDays, onClose }: RachaModalProps) {
             <Text style={styles.streakLabel}>días</Text>
           </View>
 
-          <WeekCalendar streakDays={streakDays} />
+          <WeekCalendar streakDays={streakDays} theme={theme} />
         </View>
       </View>
     </Modal>
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: { flex: 1, alignItems: "center", justifyContent: "center" },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.65)" },
-  card: {
-    width: width * 0.85,
-    backgroundColor: "#111",
-    borderRadius: 24,
-    padding: 20,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#222",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-    marginBottom: 4,
-  },
-  headerTitle: { fontSize: 18, fontWeight: "800", color: "#FFF" },
-  closeBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#222",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  closeText: { fontSize: 12, color: "#AAA", fontWeight: "600" },
-  fireSection: { alignItems: "center", marginVertical: 8 },
-  lottie: { width: 120, height: 120 },
-  fireEmoji: { fontSize: 72, lineHeight: 90 },
-  streakNumber: {
-    fontSize: 64,
-    fontWeight: "900",
-    color: "#FFF",
-    lineHeight: 70,
-    marginTop: -4,
-  },
-  streakLabel: { fontSize: 16, color: "#AAA", fontWeight: "600", marginTop: 2 },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    overlay: { flex: 1, alignItems: "center", justifyContent: "center" },
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: "rgba(0,0,0,0.65)",
+    },
+    card: {
+      width: width * 0.85,
+      backgroundColor: theme.surface,
+      borderRadius: 24,
+      padding: 20,
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      width: "100%",
+      marginBottom: 4,
+    },
+    headerTitle: { fontSize: 18, fontWeight: "800", color: theme.text, textAlign: "center", flex: 1 },
+    closeBtn: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: theme.surfaceAlt,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    closeText: { fontSize: 12, color: theme.textSecondary, fontWeight: "600" },
+    fireSection: { alignItems: "center", marginVertical: 8 },
+    lottie: { width: 120, height: 120 },
+    fireEmoji: { fontSize: 72, lineHeight: 90 },
+    streakNumber: {
+      fontSize: 64,
+      fontWeight: "900",
+      color: theme.text,
+      lineHeight: 70,
+      marginTop: -4,
+    },
+    streakLabel: {
+      fontSize: 16,
+      color: theme.textSecondary,
+      fontWeight: "600",
+      marginTop: 2,
+    },
+  });
