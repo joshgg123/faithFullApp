@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   SafeAreaView,
@@ -16,89 +16,63 @@ import { LogrosModal } from "@/components/insignia/Logrosmodal";
 import { RachaButton } from "@/components/insignia/RachaButton";
 import { RachaModal } from "@/components/insignia/RachaModal";
 import { AppText as Text } from "@/components/ui/AppText";
+import { Theme } from "@/constants/theme/index";
+import { useTheme } from "@/contexts/ThemeContext";
 import { getUserName } from "@/services/userServices";
 import { UserLogro, UserStreak } from "@/types/insignia";
-import { db } from "@/services/firebaseService";
-import { collection, onSnapshot, query } from "firebase/firestore";
-
-import { useAchievementCheck } from "@/hooks/useAchievementCheck"; // 🏆 Importamos tu validador genérico
 
 import {
+  getUserLogros,
   updateStreak,
 } from "@/services/insigniasservice";
 
-const HARDCODED_USER_ID = "DsKU3kJoDuWZywM8RdRo";
-
 export default function HomeScreen() {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   const [userName, setUserName] = useState("");
-  const [streak, setStreak] = useState<UserStreak>({
-    streakDays: 0,
-    lastLoginDate: "",
-  });
 
-  // Estado reactivo para los logros locales de esta pantalla
-  const [localLogros, setLocalLogros] = useState<UserLogro[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const [rachaVisible, setRachaVisible] = useState(false);
-  const [logrosVisible, setLogrosVisible] = useState(false);
-
-  // 🔥 Inicializamos el hook siguiendo las reglas de React
-  const { checkAchievements } = useAchievementCheck();
-
-  // 1. Obtener nombre del usuario
   useEffect(() => {
     async function fetchUserName() {
       const name = await getUserName();
       setUserName(name);
     }
-    
+
     fetchUserName();
   }, []);
 
-  // 2. OBSERVADOR EN TIEMPO REAL: Sincroniza los logros y actualiza el contador al instante
+  const [streak, setStreak] = useState<UserStreak>({
+    streakDays: 0,
+    lastLoginDate: "",
+  });
+
+  const [logros, setLogros] = useState<UserLogro[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [rachaVisible, setRachaVisible] = useState(false);
+  const [logrosVisible, setLogrosVisible] = useState(false);
+
   useEffect(() => {
-    const logrosRef = collection(db, "USUARIO", HARDCODED_USER_ID, "LOGROS");
-    const q = query(logrosRef);
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const listaLogros = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as UserLogro[];
-
-      setLocalLogros(listaLogros);
-    }, (error) => {
-      console.error("Error escuchando logros en el Home: ", error);
-    });
-
-    return () => unsubscribe();
+    loadData();
   }, []);
 
-  // 3. Cargar la racha y validar logros por racha acumulada
-  useEffect(() => {
-    async function loadStreakData() {
-      setLoading(true);
-      try {
-        // Actualiza y trae los datos de racha (manejando internamente el reseteo a 0 si corresponde)
-        const streakData = await updateStreak();
-        setStreak(streakData);
+  async function loadData() {
+    setLoading(true);
 
-        // 🔥 Lanzamos la comprobación de logros basados en los días de racha obtenidos
-        await checkAchievements("streak");
-        
-      } catch (error) {
-        console.error("Error al cargar racha o verificar logros:", error);
-      } finally {
-        setLoading(false);
-      }
+    try {
+      const [streakData, logrosData] = await Promise.all([
+        updateStreak(),
+        getUserLogros(),
+      ]);
+
+      setStreak(streakData);
+      setLogros(logrosData);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    loadStreakData();
-  }, []);
-
-  // El conteo se recalcula solo cada vez que 'localLogros' cambie en Firestore
-  const unlockedCount = localLogros.filter((l) => l.unlocked).length;
+  const unlockedCount = logros.filter((l) => l.unlocked).length;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -107,15 +81,13 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.container}>
-          {/* Saludo */}
           <Text style={styles.greeting}>
             HOLA, {userName.toUpperCase()}!
           </Text>
 
-          {/* Header */}
           {loading ? (
             <ActivityIndicator
-              color="#F5C518"
+              color={theme.primary}
               style={{ marginVertical: 30 }}
             />
           ) : (
@@ -126,27 +98,24 @@ export default function HomeScreen() {
               />
               <LogrosButton
                 unlockedCount={unlockedCount}
-                totalCount={localLogros.length}
+                totalCount={logros.length}
                 onPress={() => setLogrosVisible(true)}
               />
             </View>
           )}
 
-          {/* Tareas */}
           <View style={styles.todayRow}>
             <HomeCharacter />
             <View style={styles.todayCardWrap}>
               <TodayTasksCard />
             </View>
           </View>
-          
-          {/* Finanzas y Artículos */}
+
           <FinanceSummaryCard />
           <LatestArticles />
         </View>
       </ScrollView>
 
-      {/* Modales del sistema */}
       <RachaModal
         visible={rachaVisible}
         streakDays={streak.streakDays}
@@ -161,37 +130,38 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: "#0A0A0A",
-  },
-  scrollContent: {
-    paddingBottom: 40,
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  greeting: {
-    fontSize: 28,
-    fontWeight: "900",
-    color: "#FFF",
-    marginBottom: 24,
-    letterSpacing: 0.5,
-    textAlign: "center",
-    width: "100%",
-  },
-  btnRow: {
-    flexDirection: "row",
-    gap: 16,
-    marginBottom: 24,
-  },
-  todayRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-  todayCardWrap: {
-    flex: 1,
-  },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    safe: {
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+    scrollContent: {
+      paddingBottom: 40,
+    },
+    container: {
+      flex: 1,
+      padding: 20,
+    },
+    greeting: {
+      fontSize: 28,
+      fontWeight: "900",
+      color: theme.text,
+      marginBottom: 24,
+      letterSpacing: 0.5,
+      textAlign: "center",
+      width: "100%",
+    },
+    btnRow: {
+      flexDirection: "row",
+      gap: 16,
+      marginBottom: 24,
+    },
+    todayRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+    },
+    todayCardWrap: {
+      flex: 1,
+    },
+  });

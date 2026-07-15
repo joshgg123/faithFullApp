@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { TextInput } from "react-native";
 
 import { TreasuryProvider } from "@/contexts/TesoroContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,9 +26,11 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <TreasuryProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-    </TreasuryProvider>
+    <ThemeProvider>
+      <TreasuryProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </TreasuryProvider>
+    </ThemeProvider>
   );
 }
 
