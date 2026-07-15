@@ -103,12 +103,16 @@ export function FinanceSummaryCard() {
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     card: {
-      backgroundColor: "transparent",
+      backgroundColor: theme.surfaceAlt,
       marginTop: 24,
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
       minHeight: 110,
+      alignSelf: "stretch",
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      borderRadius: 20,
     },
     center: {
       justifyContent: "center",

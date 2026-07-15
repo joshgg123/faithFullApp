@@ -80,13 +80,15 @@ const createStyles = (theme: Theme) =>
     label: {
       fontSize: 20,
       fontWeight: "800",
+      textAlign: "center",
       color: theme.textSecondary,
       marginTop: 5,
     },
     count: {
       fontSize: 15,
+      textAlign: "center",
       color: theme.textSecondary,
-      marginTop: -3,
+      marginTop: -1,
       marginBottom: 5,
     },
     circleWrapper: {
